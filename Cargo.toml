@@ -1,0 +1,5 @@
+[workspace]
+members = [
+  "dependent",
+  "dependent_attribute"
+]
