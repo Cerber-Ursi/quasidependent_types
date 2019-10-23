@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 dependent_attribute = { path = "../dependent_attribute" }
+typenum = "1.11"
