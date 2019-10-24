@@ -28,7 +28,7 @@ pub fn dependent_out(attr: TokenStream, input: TokenStream) -> TokenStream {
     let params = input.sig.generics.clone();
     let (generic_pat, generic_out) = if params.lt_token.is_some() {
         // We need to generate generic parameters
-        let pat = quote! { [$($param:tt)*] };
+        let pat = quote! { <$($param:path),*> };
         let out = quote! { ::<$($param)*> };
         (pat, out)
     } else {

@@ -89,15 +89,15 @@ pub fn zip_add<Item: AddAssign<Item> + Clone, T: DependentVec<Vec<Item>>>(first:
 
 #[test]
 fn test() {
-    let v1 = parse_list_discarding!([i64] "1,2,3,str,4".into());
-    let v2 = parse_list_discarding!([i64] "-1,-2,str,-3,-4".into());
+    let v1 = parse_list_discarding!(<i64> "1,2,3,str,4".into());
+    let v2 = parse_list_discarding!(<i64> "-1,-2,str,-3,-4".into());
     let (v1, v2) = v1.try_unify(v2).unwrap_or_else(|_| panic!("Not equal length"));
     assert_eq!(zip_add(v1, v2).into_inner(), vec![0, 0, 0, 0]);
 }
 
 #[test]
 fn error() {
-    let v1 = parse_list_discarding!([i64] "1".into());
-    let v2 = parse_list_discarding!([i64] "".into());
+    let v1 = parse_list_discarding!(<i64> "1".into());
+    let v2 = parse_list_discarding!(<i64> "".into());
     v1.try_unify(v2).err().unwrap();
 }
