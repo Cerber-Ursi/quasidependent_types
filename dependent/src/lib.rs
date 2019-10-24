@@ -15,6 +15,9 @@ pub trait DependentInnerOperate: DependentInner {
         f(tmp.freeze());
         tmp
     }
+    fn operate(&mut self, f: impl FnOnce(&mut Self::Frozen)) {
+        f(self.freeze());
+    }
 }
 impl<T: DependentInner> DependentInnerOperate for T {}
 impl<Item: Clone> DependentInner for Vec<Item> {
@@ -31,6 +34,7 @@ pub trait DependentVec<Inner: DependentInnerOperate>: Sized {
     fn try_unify<T: DependentVec<Inner>>(self, other: T) -> Result<(Self, Self), (Self, T)>;
     fn len(&self) -> usize;
     fn into_inner(self) -> Inner;
+    fn inner(&self) -> &Inner;
     fn map(self, f: impl FnOnce(&mut Inner::Frozen)) -> Self;
     fn consume(self, f: impl FnOnce(&mut Inner::Frozen));
 }
@@ -42,6 +46,9 @@ impl<Item: Clone> DependentVec<Vec<Item>> for Vect<Item> {
     }
     fn into_inner(self) -> Vec<Item> {
         self.0
+    }
+    fn inner(&self) -> &Vec<Item> {
+        &self.0
     }
     fn try_unify<T: DependentVec<Vec<Item>>>(self, other: T) -> Result<(Self, Self), (Self, T)> {
         if self.len() == other.len() {
@@ -76,8 +83,8 @@ pub fn parse_list_discarding<Item: FromStr + Clone>(input: String) -> Vec<Item> 
         .collect()
 }
 
-pub fn zip_add<Item: AddAssign<Item> + ToOwned, T: DependentVec<Vec<Item>>>(first: T, second: T) -> T {
-    first.map(|v1| second.consume(|v2| v1.iter_mut().zip(v2.iter()).for_each(|(i1, i2)| *i1 += i2.to_owned())))
+pub fn zip_add<Item: AddAssign<Item> + Clone, T: DependentVec<Vec<Item>>>(first: T, second: T) -> T {
+    first.map(|v1| second.consume(|v2| v1.iter_mut().zip(v2.iter()).for_each(|(i1, i2)| *i1 += i2.clone())))
 }
 
 #[test]
@@ -86,4 +93,11 @@ fn test() {
     let v2 = parse_list_discarding!([i64] "-1,-2,str,-3,-4".into());
     let (v1, v2) = v1.try_unify(v2).unwrap_or_else(|_| panic!("Not equal length"));
     assert_eq!(zip_add(v1, v2).into_inner(), vec![0, 0, 0, 0]);
+}
+
+#[test]
+fn error() {
+    let v1 = parse_list_discarding!([i64] "1".into());
+    let v2 = parse_list_discarding!([i64] "".into());
+    v1.try_unify(v2).err().unwrap();
 }
