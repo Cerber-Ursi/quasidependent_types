@@ -1,3 +1,5 @@
+use dependent_attribute::dependent_trait;
+
 pub trait DependentInner: Sized {
     type Frozen: ?Sized;
     fn freeze(&mut self) -> &mut Self::Frozen;
@@ -36,17 +38,19 @@ pub trait DependentVec<Inner: DependentInnerOperate>: Sized {
 }
 
 pub struct Vect<Item>(Vec<Item>);
-impl<Item: Clone> DependentVec<Vec<Item>> for Vect<Item> {
+#[dependent_trait]
+impl<Item: Clone> DependentVec for Vect<Item> {
+    type Inner = Vec<Item>;
     fn len(&self) -> usize {
         self.0.len()
     }
-    fn into_inner(self) -> Vec<Item> {
+    fn into_inner(self) -> Inner {
         self.0
     }
-    fn inner(&self) -> &Vec<Item> {
+    fn inner(&self) -> &Inner {
         &self.0
     }
-    fn try_unify<T: DependentVec<Vec<Item>>>(self, other: T) -> Result<(Self, Self), (Self, T)> {
+    fn try_unify<T: Trait>(self, other: T) -> Result<(Self, Self), (Self, T)> {
         if self.len() == other.len() {
             let other = Self(other.into_inner());
             Ok((self, other))
@@ -54,20 +58,20 @@ impl<Item: Clone> DependentVec<Vec<Item>> for Vect<Item> {
             Err((self, other))
         }
     }
-    fn map(self, f: impl FnOnce(&mut <Vec<Item> as DependentInner>::Frozen)) -> Self {
+    fn map(self, f: impl FnOnce(&mut Inner::Frozen)) -> Self {
         let mut inner = self.into_inner();
         f(inner.freeze());
         Self(inner)
     }
-    fn consume(self, f: impl FnOnce(&mut <Vec<Item> as DependentInner>::Frozen)) {
+    fn consume(self, f: impl FnOnce(&mut Inner::Frozen)) {
         f(self.into_inner().freeze()) 
     }
-    fn map_ref(&self, f: impl FnOnce(&mut <Vec<Item> as DependentInner>::Frozen)) -> Self {
+    fn map_ref(&self, f: impl FnOnce(&mut Inner::Frozen)) -> Self {
         let mut inner = self.inner().clone();
         f(inner.freeze());
         Self(inner)
     }
-    fn consume_ref(&self, f: impl FnOnce(&mut <Vec<Item> as DependentInner>::Frozen)) {
+    fn consume_ref(&self, f: impl FnOnce(&mut Inner::Frozen)) {
         f(self.inner().clone().freeze())
     }
 }
