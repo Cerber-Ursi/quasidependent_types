@@ -1,7 +1,7 @@
-use syn::{Block, Error, ItemFn, ReturnType, Type};
 use proc_macro::TokenStream;
 use proc_macro2::{Ident, Span, TokenStream as pm2_ts};
 use quote::quote;
+use syn::{Block, Error, ItemFn, ReturnType, Type};
 
 type Extracted = (Type, Ident, pm2_ts, pm2_ts, Box<Block>);
 

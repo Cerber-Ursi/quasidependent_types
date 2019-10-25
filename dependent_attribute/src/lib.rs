@@ -1,3 +1,5 @@
+#![feature(proc_macro_diagnostic)]
+
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
@@ -5,6 +7,7 @@ use quote::quote;
 use syn::*;
 
 mod func;
+mod traitgen;
 
 struct OutParams {
     trait_path: TypePath,
@@ -16,14 +19,20 @@ impl parse::Parse for OutParams {
         let trait_path = input.parse()?;
         input.parse::<Token![,]>()?;
         let struct_path = input.parse()?;
-        Ok(Self { trait_path, struct_path })
+        Ok(Self {
+            trait_path,
+            struct_path,
+        })
     }
 }
 
 #[proc_macro_attribute]
 pub fn dependent_out(attr: TokenStream, input: TokenStream) -> TokenStream {
     let mut input = parse_macro_input!(input as ItemFn);
-    let OutParams { trait_path, struct_path } = parse_macro_input!(attr as OutParams);
+    let OutParams {
+        trait_path,
+        struct_path,
+    } = parse_macro_input!(attr as OutParams);
 
     let (orig_out, name, generic_out, generic_pat, body) = match func::extract_info(input.clone()) {
         Ok(info) => info,
@@ -31,7 +40,9 @@ pub fn dependent_out(attr: TokenStream, input: TokenStream) -> TokenStream {
     };
 
     input.sig.output = parse2(quote! { -> impl #trait_path }).unwrap();
-    input.block = parse2(quote! {{ let out: #orig_out = #body; let out: #struct_path = out.into(); out }}).unwrap();
+    input.block =
+        parse2(quote! {{ let out: #orig_out = #body; let out: #struct_path = out.into(); out }})
+            .unwrap();
 
     let output = quote! {
         macro_rules! #name {
@@ -51,6 +62,11 @@ pub fn dependent_out(attr: TokenStream, input: TokenStream) -> TokenStream {
 pub fn dependent_trait(_: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemImpl);
 
-    let output = quote! { #input };
+    let (trait_decl, trait_impl) = match traitgen::generate(input) {
+        Ok(res) => res,
+        Err(error) => return error,
+    };
+
+    let output = quote! { #trait_decl #trait_impl };
     output.into()
 }

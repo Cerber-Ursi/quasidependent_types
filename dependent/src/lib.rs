@@ -26,17 +26,6 @@ impl<Item: Clone> DependentInner for Vec<Item> {
     }
 }
 
-pub trait DependentVec<Inner: DependentInnerOperate>: Sized {
-    fn try_unify<T: DependentVec<Inner>>(self, other: T) -> Result<(Self, Self), (Self, T)>;
-    fn len(&self) -> usize;
-    fn into_inner(self) -> Inner;
-    fn inner(&self) -> &Inner;
-    fn map(self, f: impl FnOnce(&mut Inner::Frozen)) -> Self;
-    fn consume(self, f: impl FnOnce(&mut Inner::Frozen));
-    fn map_ref(&self, f: impl FnOnce(&mut Inner::Frozen)) -> Self;
-    fn consume_ref(&self, f: impl FnOnce(&mut Inner::Frozen));
-}
-
 pub struct Vect<Item>(Vec<Item>);
 #[dependent_trait]
 impl<Item: Clone> DependentVec for Vect<Item> {
@@ -64,7 +53,7 @@ impl<Item: Clone> DependentVec for Vect<Item> {
         Self(inner)
     }
     fn consume(self, f: impl FnOnce(&mut Inner::Frozen)) {
-        f(self.into_inner().freeze()) 
+        f(self.into_inner().freeze())
     }
     fn map_ref(&self, f: impl FnOnce(&mut Inner::Frozen)) -> Self {
         let mut inner = self.inner().clone();
