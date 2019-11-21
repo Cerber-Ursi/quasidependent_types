@@ -16,8 +16,8 @@ fn zip_sum<T: Clone + Add<T, Output=T>, N: Nat>(
     })
 }
 
-macro_rules! vect {
-    ($v:expr => $n:ident) => {{
+macro_rules! n {
+    ($n:ident) => {
         #[derive(Copy, Clone)]
         struct $n(usize);
         impl Nat for $n {
@@ -28,14 +28,29 @@ macro_rules! vect {
                 Self(s)
             }
         }
+    }
+}
+
+macro_rules! vect {
+    ($v:expr => $n:ident) => {{
+        n!($n);
         collect::<_, $n, _>($v)
+    }}
+}
+
+macro_rules! parse_i64_discarding {
+    ($string:literal => $n:ident) => {{
+        use std::str::FromStr;
+        let string: &str = &*$string;
+        n!($n);
+        collect::<_, $n, _>(string.split(",").map(i64::from_str).filter_map(Result::ok))
     }}
 }
 
 #[test]
 fn summing() {
     let (n1, v1) = vect!(vec![1] => N1);
-    let (n2, v2) = vect!(vec![1] => N2);
+    let (n2, v2) = vect!(vec![1] => N1);
 
     assert_eq!(
         NatEq::eq(n1, n2).map(|proof| zip_sum(v1, v2.retag(proof.rev())).into_inner()),
@@ -63,4 +78,14 @@ fn mismatch() {
     let (n1, _) = vect!(vec![1] => N1);
     let (n2, _) = vect!(vec![2, 3] => N2);
     assert!(NatEq::eq(n1, n2).is_none());
+}
+
+#[test]
+fn runtime_size() {
+    let (n1, v1) = parse_i64_discarding!("1,2,3,four,5" => N1);
+    let (n2, v2) = parse_i64_discarding!("1,two,3,4,5" => N2);
+    assert_eq!(
+        NatEq::eq(n1, n2).map(|proof| zip_sum(v1, v2.retag(proof.rev())).into_inner()),
+        Some(vec![2, 5, 7, 10])
+    );
 }

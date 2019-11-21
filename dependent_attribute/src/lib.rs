@@ -7,7 +7,6 @@ use quote::quote;
 use syn::*;
 
 mod func;
-mod traitgen;
 
 struct OutParams {
     trait_path: TypePath,
@@ -58,15 +57,3 @@ pub fn dependent_out(attr: TokenStream, input: TokenStream) -> TokenStream {
     output.into()
 }
 
-#[proc_macro_attribute]
-pub fn dependent_trait(_: TokenStream, input: TokenStream) -> TokenStream {
-    let input = parse_macro_input!(input as ItemImpl);
-
-    let (trait_decl, trait_impl) = match traitgen::generate(input) {
-        Ok(res) => res,
-        Err(error) => return error,
-    };
-
-    let output = quote! { #trait_decl #trait_impl };
-    output.into()
-}
