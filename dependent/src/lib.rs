@@ -1,6 +1,9 @@
 pub mod traits {
-    use std::marker::PhantomData;
-    
+    pub use super::dependent::*;
+    pub use super::nat::*;
+}
+
+mod dependent {    
     pub trait DependentInner: Sized + Clone {
         type Frozen: ?Sized;
         fn freeze(&mut self) -> &mut Self::Frozen;
@@ -51,15 +54,26 @@ pub mod traits {
             f(self.inner().clone().freeze())
         }
     }
+}
 
-    pub struct Equiv<T1, T2>(PhantomData<(T1, T2)>);
+mod nat {
+    use std::marker::PhantomData;
+
+    #[derive(Copy, Clone, Debug)]
+    pub struct Equiv<T1: Nat, T2: Nat>(PhantomData<(T1, T2)>);
+
+    impl<T1: Nat, T2: Nat> Equiv<T1, T2> {
+        pub fn rev(self) -> Equiv<T2, T1> {
+            Equiv(PhantomData)
+        }
+    }
 
     pub trait Nat: Sized {
         fn as_usize(&self) -> usize;
         fn from_usize(s: usize) -> Self;
     }
     pub trait NatEq: Nat {
-        fn eq<N: Nat>(this: &Self, other: &N) -> Option<Equiv<Self, N>> {
+        fn eq<N: Nat>(this: Self, other: N) -> Option<Equiv<Self, N>> {
             if this.as_usize() == other.as_usize() {
                 Some(Equiv(PhantomData))
             } else {
@@ -110,5 +124,11 @@ pub mod vect {
     ) -> (N, Vect<Item, N>) {
         let inner: Vec<_> = iter.into_iter().collect();
         (N::from_usize(inner.len()), Vect(inner, PhantomData))
+    }
+
+    impl<Item: Clone, N: Nat> Vect<Item, N> {
+        pub fn retag<New: Nat>(self, _proof: Equiv<N, New>) -> Vect<Item, New> {
+            collect(self.0).1
+        }
     }
 }
