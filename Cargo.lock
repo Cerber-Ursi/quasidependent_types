@@ -9,6 +9,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "dependent-usage"
+version = "0.1.0"
+dependencies = [
+ "dependent 0.1.0",
+]
+
+[[package]]
 name = "dependent_attribute"
 version = "0.1.0"
 dependencies = [
