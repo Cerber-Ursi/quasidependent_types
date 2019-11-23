@@ -1,6 +1,6 @@
-use dependent_attribute::randomize;
+use dependent_attribute::label_timestamp;
 
-#[randomize]
+#[label_timestamp(NatInner)]
 mod nat {
     use std::marker::PhantomData;
 
@@ -13,6 +13,7 @@ mod nat {
         }
     }
 
+    /// Inner trait, not to be used by consumers directly. Its name is labeled with timestamp on every build.
     pub trait NatInner {}
     pub trait Nat: Sized + NatInner {
         fn as_usize(&self) -> usize;
