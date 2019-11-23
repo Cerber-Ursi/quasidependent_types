@@ -32,7 +32,7 @@ impl<Item: Clone, N: Nat> DependentInner for VecWrapper<Item, N> {
     fn freeze(&mut self) -> &mut Self::Frozen {
         self.0.as_mut_slice()
     }
-    fn recreate(frozen: &Self::Frozen) -> Self {
+    fn recreate(frozen: &Self::Frozen, _: Marker) -> Self {
         frozen.iter().cloned().collect()
     }
 }
@@ -40,7 +40,7 @@ impl<Item: Clone, N: Nat> DependentInner for VecWrapper<Item, N> {
 pub struct Vect<T, N: Nat>(VecWrapper<T, N>);
 impl<Item: Clone, N: Nat> Dependent for Vect<Item, N> {
     type Inner = VecWrapper<Item, N>;
-    fn from_inner(v: Self::Inner) -> Self {
+    fn from_inner(v: Self::Inner, _: Marker) -> Self {
         Self(v)
     }
     fn into_inner(self) -> Self::Inner {

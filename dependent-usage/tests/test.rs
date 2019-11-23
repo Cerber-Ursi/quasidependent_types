@@ -1,4 +1,5 @@
 use dependent::traits::{Dependent, DependentOperate, Nat, NatEq};
+use dependent::n;
 use dependent_usage::{collect, Vect};
 use std::ops::Add;
 
@@ -15,24 +16,9 @@ fn zip_sum<T: Clone + Add<T, Output=T>, N: Nat>(
     })
 }
 
-macro_rules! n {
-    ($n:ident) => {
-        #[derive(Copy, Clone)]
-        struct $n(usize);
-        impl Nat for $n {
-            fn as_usize(&self) -> usize {
-                self.0
-            }
-            fn from_usize(s: usize) -> Self {
-                Self(s)
-            }
-        }
-    }
-}
-
 macro_rules! vect {
     ($v:expr) => {{
-        n!(N);
+        n!();
         collect::<_, N, _>($v)
     }}
 }
@@ -41,7 +27,7 @@ macro_rules! parse_i64_discarding {
     ($string:literal) => {{
         use std::str::FromStr;
         let string: &str = &*$string;
-        n!(N);
+        n!();
         collect::<_, N, _>(string.split(",").map(i64::from_str).filter_map(Result::ok))
     }}
 }

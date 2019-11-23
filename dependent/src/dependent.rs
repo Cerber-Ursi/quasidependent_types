@@ -1,3 +1,9 @@
+struct InnerMarker;
+pub struct Marker(InnerMarker);
+fn marker() -> Marker {
+    Marker(InnerMarker)
+}
+
 /// Supplementary trait, for use in mapping operations.
 ///
 /// It should be chosen in such a way that, having an unique reference to this type,
@@ -5,7 +11,7 @@
 pub trait DependentInner: Sized + Clone {
     type Frozen: ?Sized;
     fn freeze(&mut self) -> &mut Self::Frozen;
-    fn recreate(_: &Self::Frozen) -> Self;
+    fn recreate(_: &Self::Frozen, _: Marker) -> Self;
 }
 /// Supplementary trait, providing mapping operations on dependent type
 ///
@@ -13,7 +19,7 @@ pub trait DependentInner: Sized + Clone {
 /// so that the users of the crate are unable to override the implementation.
 pub trait DependentInnerOperate: DependentInner {
     fn transform(mut self, f: impl FnOnce(&mut Self::Frozen)) -> Self {
-        let mut tmp = Self::recreate(self.freeze());
+        let mut tmp = Self::recreate(self.freeze(), marker());
         f(tmp.freeze());
         tmp
     }
@@ -26,7 +32,7 @@ impl<T: DependentInner> DependentInnerOperate for T {}
 /// Main trait, describing possible dependent type.
 pub trait Dependent {
     type Inner: DependentInnerOperate;
-    fn from_inner(_: Self::Inner) -> Self
+    fn from_inner(_: Self::Inner, _: Marker) -> Self
     where
         Self: Sized;
     fn into_inner(self) -> Self::Inner;
@@ -39,7 +45,7 @@ pub trait DependentOperate: Dependent {
     {
         let mut inner = self.into_inner();
         f(inner.freeze());
-        Self::from_inner(inner)
+        Self::from_inner(inner, marker())
     }
     fn consume(self, f: impl FnOnce(&mut <Self::Inner as DependentInner>::Frozen))
     where
@@ -53,7 +59,7 @@ pub trait DependentOperate: Dependent {
     {
         let mut inner: Self::Inner = self.inner().clone();
         f(inner.freeze());
-        Self::from_inner(inner)
+        Self::from_inner(inner, marker())
     }
     fn consume_ref(&self, f: impl FnOnce(&mut <Self::Inner as DependentInner>::Frozen)) {
         f(self.inner().clone().freeze())
