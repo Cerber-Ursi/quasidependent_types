@@ -1,5 +1,5 @@
-use dependent::with_n;
-use dependent::traits::{Dependent, DependentOperate, Nat, NatEq};
+use dependent::*;
+use dependent_nat::*;
 use dependent_vect::{Vect, vect};
 use std::ops::Add;
 

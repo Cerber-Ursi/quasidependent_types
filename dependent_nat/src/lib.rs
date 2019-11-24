@@ -1,3 +1,5 @@
+#![feature(proc_macro_hygiene)]
+
 use dependent_attribute::label_timestamp;
 
 #[label_timestamp(NatInner)]
@@ -35,8 +37,8 @@ mod nat {
         ($($inner:tt)*) => {{
             #[derive(Copy, Clone)]
             struct N(usize);
-            impl $crate::traits::NatInner for N {}
-            impl $crate::traits::Nat for N {
+            impl $crate::NatInner for N {}
+            impl $crate::Nat for N {
                 fn as_usize(&self) -> usize {
                     self.0
                 }

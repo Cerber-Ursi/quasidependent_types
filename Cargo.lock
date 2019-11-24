@@ -4,7 +4,6 @@
 name = "dependent"
 version = "0.1.0"
 dependencies = [
- "dependent_attribute 0.1.0",
  "typenum 1.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -18,10 +17,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "dependent_nat"
+version = "0.1.0"
+dependencies = [
+ "dependent_attribute 0.1.0",
+]
+
+[[package]]
 name = "dependent_vect"
 version = "0.1.0"
 dependencies = [
  "dependent 0.1.0",
+ "dependent_nat 0.1.0",
 ]
 
 [[package]]

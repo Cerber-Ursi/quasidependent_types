@@ -1,4 +1,5 @@
-use dependent::traits::*;
+use dependent::*;
+use dependent_nat::*;
 use std::marker::PhantomData;
 
 pub struct Vect<T, N: Nat>(Vec<T>, PhantomData<N>);
