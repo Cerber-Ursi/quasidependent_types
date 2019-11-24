@@ -18,7 +18,7 @@ fn zip_sum<T: Clone + Add<T, Output = T>, N: Nat>(
 macro_rules! vect {
     ($v:expr) => {
         with_n! {
-            collect::<_, N, _>($v)
+            collect::<_, _, N, _>($v)
         }
     };
 }
@@ -28,7 +28,7 @@ macro_rules! parse_i64_discarding {
         with_n! {
             use std::str::FromStr;
             let string: &str = &*$string;
-            collect::<_, N, _>(string.split(",").map(i64::from_str).filter_map(Result::ok))
+            collect::<_, _, N, _>(string.split(",").map(i64::from_str).filter_map(Result::ok))
         }
     };
 }
