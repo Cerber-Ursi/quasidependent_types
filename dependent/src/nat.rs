@@ -31,8 +31,8 @@ mod nat {
     impl<T: Nat> NatEq for T {}
 
     #[macro_export]
-    macro_rules! n {
-        () => {
+    macro_rules! with_n {
+        ($($inner:tt)*) => {{
             #[derive(Copy, Clone)]
             struct N(usize);
             impl $crate::traits::NatInner for N {}
@@ -44,7 +44,8 @@ mod nat {
                     Self(s)
                 }
             }
-        };
+            $($inner)*
+        }};
     }
 
 }
