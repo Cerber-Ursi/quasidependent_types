@@ -2,5 +2,5 @@
 members = [
   "dependent",
   "dependent_attribute",
-  "dependent-usage"
+  "dependent_vect"
 ]

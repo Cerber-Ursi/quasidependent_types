@@ -1,6 +1,6 @@
 use dependent::with_n;
 use dependent::traits::{Dependent, DependentOperate, Nat, NatEq};
-use dependent_usage::{Vect, vect};
+use dependent_vect::{Vect, vect};
 use std::ops::Add;
 
 fn zip_sum<T: Clone + Add<T, Output = T>, N: Nat>(
