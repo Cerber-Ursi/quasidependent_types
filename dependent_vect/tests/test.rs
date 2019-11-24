@@ -67,3 +67,19 @@ fn runtime_size() {
         Some(vec![2, 5, 7, 10])
     );
 }
+
+#[test]
+fn fixed_size() {
+    use dependent_vect::collect;
+    use typenum::consts::*;
+    let (_, v) = collect::<_, _, U2, _>(vec![1u32, 2]);
+    assert_eq!(v.into_native(), vec![1u32, 2]);
+}
+
+#[test]
+#[should_panic]
+fn fixed_size_mismatch() {
+    use dependent_vect::collect;
+    use typenum::consts::*;
+    let _ = collect::<_, _, U2, _>(&[1]);
+}

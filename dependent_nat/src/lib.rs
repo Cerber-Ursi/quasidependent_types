@@ -50,4 +50,25 @@ mod nat {
         }};
     }
 
+    #[cfg(feature = "typenum_consts")]
+    mod typenum_consts {
+        use typenum::Unsigned;
+        use super::*;
+        impl<T: Unsigned> NatInner for T {}
+        impl<T: Unsigned + Default> Nat for T {
+            fn as_usize(&self) -> usize {
+                Self::USIZE
+            }
+            fn from_usize(s: usize) -> Self {
+                if s == Self::USIZE {
+                    Self::default()
+                } else {
+                    panic!(format!("Runtime value mismatched with compile-time constraint: expected {}, got {}", Self::USIZE, s));
+                }
+            }
+        }
+    }
+    #[cfg(feature = "typenum_consts")]
+    pub use self::typenum_consts::*;
+
 }
