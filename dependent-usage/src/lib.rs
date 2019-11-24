@@ -25,11 +25,22 @@ impl<Item: Clone, N: Nat> Dependent for Vect<Item, N> {
     }
 }
 
-pub fn collect<Item: Clone, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(iter: I) -> (N, Vect<Item, N>) {
+pub fn collect<Item: Clone, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
+    iter: I,
+) -> (N, Vect<Item, N>) {
     let inner: Vec<_> = iter.into_iter().collect();
     (N::from_usize(inner.len()), Vect(inner, PhantomData))
 }
 
+#[macro_export]
+macro_rules! vect {
+    ($data:expr) => {{
+        let v = $data;
+        with_n! {
+            $crate::collect::<_, _, N, _>(v)
+        }
+    }};
+}
 
 impl<Item: Clone, N: Nat> Vect<Item, N> {
     pub fn retag<New: Nat>(self, _proof: Equiv<N, New>) -> Vect<Item, New> {
