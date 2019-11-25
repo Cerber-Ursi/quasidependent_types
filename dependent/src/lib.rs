@@ -9,4 +9,3 @@ pub trait Dependent {
     fn into_native(self) -> Self::Native;
     fn as_native(&self) -> &Self::Native;
 }
-

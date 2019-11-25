@@ -13,6 +13,13 @@ mod nat {
         pub fn rev(self) -> Equiv<T2, T1> {
             Equiv(PhantomData)
         }
+        pub fn check(n1: T1, n2: T2) -> Option<Self> {
+            if n1.as_usize() == n2.as_usize() {
+                Some(Self(PhantomData))
+            } else {
+                None
+            }
+        }
     }
 
     /// Inner trait, not to be used by consumers directly. Its name is labeled with timestamp on every build.
@@ -21,16 +28,6 @@ mod nat {
         fn as_usize(&self) -> usize;
         fn from_usize(s: usize) -> Self;
     }
-    pub trait NatEq: Nat {
-        fn eq<N: Nat>(this: Self, other: N) -> Option<Equiv<Self, N>> {
-            if this.as_usize() == other.as_usize() {
-                Some(Equiv(PhantomData))
-            } else {
-                None
-            }
-        }
-    }
-    impl<T: Nat> NatEq for T {}
 
     #[macro_export]
     macro_rules! with_n {
@@ -52,8 +49,8 @@ mod nat {
 
     #[cfg(feature = "typenum_consts")]
     mod typenum_consts {
-        use typenum::Unsigned;
         use super::*;
+        use typenum::Unsigned;
         impl<T: Unsigned> NatInner for T {}
         impl<T: Unsigned + Default + Copy + Clone> Nat for T {
             fn as_usize(&self) -> usize {
@@ -70,7 +67,6 @@ mod nat {
     }
     #[cfg(feature = "typenum_consts")]
     pub use self::typenum_consts::*;
-
 }
 
 pub use self::nat::*;

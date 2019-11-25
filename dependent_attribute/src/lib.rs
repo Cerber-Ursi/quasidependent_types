@@ -32,14 +32,19 @@ pub fn label_timestamp(attr: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 fn update(item: proc_macro2::TokenStream, from: &Ident, to: &Ident) -> proc_macro2::TokenStream {
-    use proc_macro2::TokenTree::*;
+    use proc_macro2::*;
     item.into_iter()
         .map(|tok| match tok {
-            Group(group) => Group(proc_macro2::Group::new(
-                group.delimiter(),
-                update(group.stream(), from, to),
-            )),
-            Ident(ident) if ident.to_string() == from.to_string() => Ident(to.clone()),
+            TokenTree::Group(group) => {
+                let mut new_group = Group::new(group.delimiter(), update(group.stream(), from, to));
+                new_group.set_span(group.span());
+                TokenTree::Group(new_group)
+            }
+            TokenTree::Ident(ident) if ident.to_string() == from.to_string() => {
+                let mut to = to.clone();
+                to.set_span(ident.span());
+                TokenTree::Ident(to)
+            }
             tok => tok,
         })
         .collect()
