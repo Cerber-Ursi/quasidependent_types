@@ -7,18 +7,23 @@ mod nat {
     use std::marker::PhantomData;
 
     #[derive(Copy, Clone, Debug)]
-    pub struct Equiv<T1: Nat, T2: Nat>(PhantomData<(T1, T2)>);
+    pub struct Equiv<N1: Nat, N2: Nat>(PhantomData<(N1, N2)>);
 
-    impl<T1: Nat, T2: Nat> Equiv<T1, T2> {
-        pub fn rev(self) -> Equiv<T2, T1> {
+    impl<N1: Nat, N2: Nat> Equiv<N1, N2> {
+        pub fn rev(self) -> Equiv<N2, N1> {
             Equiv(PhantomData)
         }
-        pub fn check(n1: T1, n2: T2) -> Option<Self> {
+        pub fn check(n1: N1, n2: N2) -> Option<Self> {
             if n1.as_usize() == n2.as_usize() {
                 Some(Self(PhantomData))
             } else {
                 None
             }
+        }
+    }
+    impl<N: Nat> Equiv<N, N> {
+        pub fn refl() -> Self {
+            Self(PhantomData)
         }
     }
 
@@ -28,6 +33,12 @@ mod nat {
         fn as_usize(&self) -> usize;
         fn from_usize(s: usize) -> Self;
     }
+    pub trait NatWrapper: Nat {
+        fn refl(self) -> Equiv<Self, Self> {
+            Equiv::refl()
+        }
+    }
+    impl<N: Nat> NatWrapper for N {}
 
     #[macro_export]
     macro_rules! with_n {

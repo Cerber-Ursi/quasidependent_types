@@ -40,6 +40,9 @@ macro_rules! vect {
 
 impl<Item: Clone, N: Nat> Vect<Item, N> {
     pub fn retag<New: Nat>(self, _proof: Equiv<N, New>) -> Vect<Item, New> {
-        Vect(self.0.into_iter().collect(), PhantomData)
+        Vect(self.0, PhantomData)
+    }
+    pub fn size_refl(&self) -> Equiv<N, N> {
+        Equiv::refl()
     }
 }
