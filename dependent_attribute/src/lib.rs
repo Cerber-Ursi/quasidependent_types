@@ -1,25 +1,22 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use proc_macro2::Span;
-use quote::{quote, ToTokens};
+use quote::{format_ident, quote, ToTokens};
 use std::time::{SystemTime, UNIX_EPOCH};
 use syn::*;
 
 #[proc_macro_attribute]
 pub fn label_timestamp(attr: TokenStream, input: TokenStream) -> TokenStream {
     let mut input = parse_macro_input!(input as ItemMod);
-    let name = input.ident.clone();
 
     let replaced = parse_macro_input!(attr as Ident);
-    let replacement = Ident::new(
-        &(replaced.to_string()
-            + &SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_millis()
-                .to_string()),
-        Span::call_site(),
+    let replacement = format_ident!(
+        "{}{}",
+        replaced,
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_millis()
     );
 
     let content = input
@@ -30,10 +27,7 @@ pub fn label_timestamp(attr: TokenStream, input: TokenStream) -> TokenStream {
         *item = parse2(update(item.to_token_stream(), &replaced, &replacement)).unwrap()
     });
 
-    let output = quote! {
-        #input
-        pub use self::#name::*;
-    };
+    let output = quote! { #input };
     output.into()
 }
 

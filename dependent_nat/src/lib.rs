@@ -72,3 +72,5 @@ mod nat {
     pub use self::typenum_consts::*;
 
 }
+
+pub use self::nat::*;

@@ -1,18 +1,17 @@
 use dependent::*;
 use dependent_nat::*;
-use dependent_vect::{Vect, vect};
+use dependent_vect::{vect, Vect};
 use std::ops::Add;
 
 fn zip_sum<T: Clone + Add<T, Output = T>, N: Nat>(
     first: Vect<T, N>,
     second: Vect<T, N>,
 ) -> Vect<T, N> {
-    first.map_clone(|v1| {
-        let v2 = second.freeze();
-        v1.iter_mut()
-            .zip(v2.iter())
-            .for_each(|(i1, i2)| *i1 = i1.clone() + i2.clone());
-    })
+    let mut v1 = first.clone();
+    let v2 = second.freeze();
+    v1.freeze_mut().iter_mut()
+        .zip(v2.iter())
+        .for_each(|(i1, i2)| *i1 = i1.clone() + i2.clone());
 }
 
 macro_rules! parse_i64_discarding {
