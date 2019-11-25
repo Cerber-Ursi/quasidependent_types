@@ -17,7 +17,7 @@ mod nat {
 
     /// Inner trait, not to be used by consumers directly. Its name is labeled with timestamp on every build.
     pub trait NatInner {}
-    pub trait Nat: Sized + NatInner {
+    pub trait Nat: Sized + NatInner + Clone + Copy {
         fn as_usize(&self) -> usize;
         fn from_usize(s: usize) -> Self;
     }
@@ -55,7 +55,7 @@ mod nat {
         use typenum::Unsigned;
         use super::*;
         impl<T: Unsigned> NatInner for T {}
-        impl<T: Unsigned + Default> Nat for T {
+        impl<T: Unsigned + Default + Copy + Clone> Nat for T {
             fn as_usize(&self) -> usize {
                 Self::USIZE
             }

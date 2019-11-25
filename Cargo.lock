@@ -17,7 +17,6 @@ dependencies = [
 name = "dependent_nat"
 version = "0.1.0"
 dependencies = [
- "dependent 0.1.0",
  "dependent_attribute 0.1.0",
  "typenum 1.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

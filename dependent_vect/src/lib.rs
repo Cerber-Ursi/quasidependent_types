@@ -2,6 +2,7 @@ use dependent::*;
 use dependent_nat::*;
 use std::marker::PhantomData;
 
+#[derive(Clone)]
 pub struct Vect<T, N: Nat>(Vec<T>, PhantomData<N>);
 impl<Item: Clone, N: Nat> Dependent for Vect<Item, N> {
     type Native = Vec<Item>;
@@ -11,12 +12,6 @@ impl<Item: Clone, N: Nat> Dependent for Vect<Item, N> {
     }
     fn freeze_mut(&mut self) -> &mut Self::Frozen {
         self.0.as_mut_slice()
-    }
-    fn from_frozen(frozen: &Self::Frozen, _: Marker) -> Self {
-        Self(frozen.iter().cloned().collect(), PhantomData)
-    }
-    fn from_native(v: Self::Native, _: Marker) -> Self {
-        Self(v, PhantomData)
     }
     fn into_native(self) -> Self::Native {
         self.0

@@ -12,6 +12,7 @@ fn zip_sum<T: Clone + Add<T, Output = T>, N: Nat>(
     v1.freeze_mut().iter_mut()
         .zip(v2.iter())
         .for_each(|(i1, i2)| *i1 = i1.clone() + i2.clone());
+    v1
 }
 
 macro_rules! parse_i64_discarding {
