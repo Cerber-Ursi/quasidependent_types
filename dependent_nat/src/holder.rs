@@ -1,4 +1,4 @@
-use std::{cell::Cell, sync::atomic::Ordering};
+use std::sync::atomic::{Ordering, AtomicUsize};
 
 #[allow(non_snake_case)]
 mod InitState {
@@ -22,13 +22,13 @@ pub enum NatStoreError {
 
 pub struct NatHolder {
     init_state: InitState::Value,
-    value: Cell<usize>,
+    value:AtomicUsize,
 }
 impl NatHolder {
     pub const fn new() -> Self {
         Self {
             init_state: InitState::Value::new(InitState::UNINIT),
-            value: Cell::new(0),
+            value: AtomicUsize::new(0),
         }
     }
     pub fn store(&self, value: usize) -> Result<(), NatStoreError> {
@@ -48,13 +48,13 @@ impl NatHolder {
                     }
                 });
         }
-        self.value.set(value);
+        self.value.store(value, Ordering::Relaxed);
         self.init_state.store(InitState::INIT, Ordering::Release);
         Ok(())
     }
     pub fn read(&self) -> Option<usize> {
         if self.init_state.load(Ordering::Acquire) == InitState::INIT {
-            Some(self.value.get())
+            Some(self.value.load(Ordering::Relaxed))
         } else {
             None
         }

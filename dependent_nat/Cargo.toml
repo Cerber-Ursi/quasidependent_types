@@ -11,4 +11,6 @@ dependent_attribute = { path = "../dependent_attribute" }
 typenum = { "version" = "1.11", "optional" = true }
 
 [features]
+default = ["typenum_consts", "nat_ops"]
 typenum_consts = ["typenum"]
+nat_ops = []

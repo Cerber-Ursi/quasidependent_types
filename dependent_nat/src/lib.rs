@@ -5,6 +5,9 @@ use dependent_attribute::label_timestamp;
 mod eq;
 mod holder;
 
+#[cfg(feature = "nat_ops")]
+mod ops;
+
 #[label_timestamp(NatInner)]
 mod nat {
     use crate::eq::Equiv;
@@ -70,6 +73,9 @@ mod nat {
     }
     #[cfg(feature = "typenum_consts")]
     pub use self::typenum_consts::*;
+
+    #[cfg(feature = "nat_ops")]
+    impl<T: crate::ops::NatOp> NatInner for T {}
 }
 
 pub fn expect_nat<N: Nat>(s: usize) -> N {
@@ -86,3 +92,6 @@ pub fn expect_nat<N: Nat>(s: usize) -> N {
 pub use self::eq::*;
 pub use self::holder::*;
 pub use self::nat::*;
+
+#[cfg(feature = "nat_ops")]
+pub use self::ops::structs::*;
