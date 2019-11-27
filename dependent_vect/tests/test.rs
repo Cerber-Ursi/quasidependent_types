@@ -84,3 +84,10 @@ fn fixed_size_mismatch() {
     use typenum::consts::*;
     let _ = collect::<_, _, U2, _>(&[1]);
 }
+
+#[test]
+fn pushing() {
+    let (_, v) = vect!(vec![1]);
+    let v = v.push(2);
+    assert_eq!(v.into_native(), vec![1, 2]);
+}

@@ -45,4 +45,8 @@ impl<Item: Clone, N: Nat> Vect<Item, N> {
     pub fn size_refl(&self) -> Equiv<N, N> {
         Equiv::refl()
     }
+    pub fn push(mut self, item: Item) -> Vect<Item, Add<N, typenum::consts::U1>> {
+        self.0.extend(std::iter::once(item));
+        Vect(self.0, PhantomData)
+    }
 }
