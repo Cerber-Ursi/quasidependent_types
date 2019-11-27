@@ -2,36 +2,19 @@
 
 use dependent_attribute::label_timestamp;
 
+mod eq;
+mod holder;
+
 #[label_timestamp(NatInner)]
 mod nat {
-    use std::marker::PhantomData;
-
-    #[derive(Copy, Clone, Debug)]
-    pub struct Equiv<N1: Nat, N2: Nat>(PhantomData<(N1, N2)>);
-
-    impl<N1: Nat, N2: Nat> Equiv<N1, N2> {
-        pub fn rev(self) -> Equiv<N2, N1> {
-            Equiv(PhantomData)
-        }
-        pub fn check(n1: N1, n2: N2) -> Option<Self> {
-            if n1.as_usize() == n2.as_usize() {
-                Some(Self(PhantomData))
-            } else {
-                None
-            }
-        }
-    }
-    impl<N: Nat> Equiv<N, N> {
-        pub fn refl() -> Self {
-            Self(PhantomData)
-        }
-    }
+    use crate::eq::Equiv;
 
     /// Inner trait, not to be used by consumers directly. Its name is labeled with timestamp on every build.
     pub trait NatInner {}
     pub trait Nat: Sized + NatInner + Clone + Copy {
+        fn get_usize() -> Option<usize>;
         fn as_usize(&self) -> usize;
-        fn from_usize(s: usize) -> Self;
+        fn from_usize(s: usize) -> Result<Self, crate::NatStoreError>;
     }
     pub trait NatWrapper: Nat {
         fn refl(self) -> Equiv<Self, Self> {
@@ -43,15 +26,20 @@ mod nat {
     #[macro_export]
     macro_rules! with_n {
         ($($inner:tt)*) => {{
+            use $crate::NatHolder;
+            static HOLDER: NatHolder = NatHolder::new();
             #[derive(Copy, Clone)]
-            struct N(usize);
+            struct N;
             impl $crate::NatInner for N {}
             impl $crate::Nat for N {
-                fn as_usize(&self) -> usize {
-                    self.0
+                fn get_usize() -> Option<usize> {
+                    HOLDER.read()
                 }
-                fn from_usize(s: usize) -> Self {
-                    Self(s)
+                fn as_usize(&self) -> usize {
+                    HOLDER.read().expect(concat!("Nat value was created without setting its value. Please report this bug to ", env!("CARGO_PKG_REPOSITORY"), "/issues"))
+                }
+                fn from_usize(s: usize) -> Result<Self, $crate::NatStoreError> {
+                    HOLDER.store(s).map(|_| Self)
                 }
             }
             $($inner)*
@@ -61,17 +49,21 @@ mod nat {
     #[cfg(feature = "typenum_consts")]
     mod typenum_consts {
         use super::*;
+        use crate::NatStoreError;
         use typenum::Unsigned;
         impl<T: Unsigned> NatInner for T {}
         impl<T: Unsigned + Default + Copy + Clone> Nat for T {
+            fn get_usize() -> Option<usize> {
+                Some(Self::USIZE)
+            }
             fn as_usize(&self) -> usize {
                 Self::USIZE
             }
-            fn from_usize(s: usize) -> Self {
+            fn from_usize(s: usize) -> Result<Self, NatStoreError> {
                 if s == Self::USIZE {
-                    Self::default()
+                    Ok(Self::default())
                 } else {
-                    panic!(format!("Runtime value mismatched with compile-time constraint: expected {}, got {}", Self::USIZE, s));
+                    Err(NatStoreError::AlreadyStored(Self::USIZE))
                 }
             }
         }
@@ -80,4 +72,17 @@ mod nat {
     pub use self::typenum_consts::*;
 }
 
+pub fn expect_nat<N: Nat>(s: usize) -> N {
+    use NatStoreError::*;
+    N::from_usize(s).unwrap_or_else(|err| match err {
+        Concurrent => panic!("Attempted to concurrently create multiple instances of Nat"),
+        AlreadyStored(val) => panic!(format!(
+            "Attempted to override already stored value {} with {}",
+            val, s
+        )),
+    })
+}
+
+pub use self::eq::*;
+pub use self::holder::*;
 pub use self::nat::*;

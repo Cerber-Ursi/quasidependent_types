@@ -25,7 +25,7 @@ pub fn collect<Item: Clone, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = It
     iter: I,
 ) -> (N, Vect<Item, N>) {
     let inner: Vec<_> = iter.into_iter().collect();
-    (N::from_usize(inner.len()), Vect(inner, PhantomData))
+    (expect_nat(inner.len()), Vect(inner, PhantomData))
 }
 
 #[macro_export]
