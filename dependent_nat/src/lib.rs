@@ -1,4 +1,5 @@
 #![feature(proc_macro_hygiene)]
+#![feature(log_syntax)]
 
 use dependent_attribute::label_timestamp;
 
@@ -75,7 +76,11 @@ mod nat {
     pub use self::typenum_consts::*;
 
     #[cfg(feature = "nat_ops")]
-    impl<T: crate::ops::NatOp> NatInner for T {}
+    mod nat_ops {
+        use crate::ops::*;
+        use super::*;
+        impl<N1: Nat, N2: Nat> NatInner for Add<N1, N2> {}
+    }
 }
 
 pub fn expect_nat<N: Nat>(s: usize) -> N {
@@ -94,4 +99,4 @@ pub use self::holder::*;
 pub use self::nat::*;
 
 #[cfg(feature = "nat_ops")]
-pub use self::ops::structs::*;
+pub use self::ops::*;
