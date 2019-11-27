@@ -17,7 +17,7 @@ mod nat {
     pub trait NatInner {}
     pub trait Nat: Sized + NatInner + Clone + Copy {
         fn get_usize() -> Option<usize>;
-        fn as_usize(&self) -> usize;
+        fn as_usize(self) -> usize;
         fn from_usize(s: usize) -> Result<Self, crate::NatStoreError>;
     }
     pub trait NatWrapper: Nat {
@@ -39,7 +39,7 @@ mod nat {
                 fn get_usize() -> Option<usize> {
                     HOLDER.read()
                 }
-                fn as_usize(&self) -> usize {
+                fn as_usize(self) -> usize {
                     HOLDER.read().expect(concat!("Nat value was created without setting its value. Please report this bug to ", env!("CARGO_PKG_REPOSITORY"), "/issues"))
                 }
                 fn from_usize(s: usize) -> Result<Self, $crate::NatStoreError> {
@@ -60,7 +60,7 @@ mod nat {
             fn get_usize() -> Option<usize> {
                 Some(Self::USIZE)
             }
-            fn as_usize(&self) -> usize {
+            fn as_usize(self) -> usize {
                 Self::USIZE
             }
             fn from_usize(s: usize) -> Result<Self, NatStoreError> {
