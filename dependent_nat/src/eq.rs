@@ -1,4 +1,3 @@
-
 use super::Nat;
 use std::marker::PhantomData;
 

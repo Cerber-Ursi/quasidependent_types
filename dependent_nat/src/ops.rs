@@ -1,4 +1,3 @@
-
 use crate::{Nat, NatStoreError};
 use std::marker::PhantomData;
 
@@ -15,7 +14,15 @@ impl<N1: Nat, N2: Nat> Nat for Add<N1, N2> {
         if Self::get_usize() == Some(s) {
             Ok(Self(PhantomData))
         } else {
-            unimplemented!("I'm not sure how to handle this error, but this should not be callable anyway");
+            unimplemented!(
+                "I'm not sure how to handle this error, but this should not be called anyway"
+            );
         }
+    }
+    fn get() -> Self {
+        Self::try_get().expect("Trying to create `Add` instance which is yet undefined")
+    }
+    fn try_get() -> Option<Self> {
+        Self::get_usize().map(|_| Self(PhantomData))
     }
 }
