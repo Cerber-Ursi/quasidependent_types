@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 dependent = { "path" = "../dependent" }
-dependent_nat = { "path" = "../dependent_nat", features = ["typenum_consts"] }
+dependent_nat = { "path" = "../dependent_nat", features = ["typenum_consts", "nat_ops", "fin"] }
 typenum = "1.11"

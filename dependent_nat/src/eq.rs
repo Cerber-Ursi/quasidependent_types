@@ -8,12 +8,11 @@ impl<N1: Nat, N2: Nat> Equiv<N1, N2> {
     pub fn rev(self) -> Equiv<N2, N1> {
         Equiv(PhantomData)
     }
-    pub fn check(n1: N1, n2: N2) -> Option<Self> {
-        if n1.as_usize() == n2.as_usize() {
-            Some(Self(PhantomData))
-        } else {
-            None
-        }
+    pub fn try_create() -> Option<Self> {
+        N1::get_usize().and_then(|n1| N2::get_usize().and_then(|n2| if n1 == n2 { Some(Self(PhantomData)) } else {None}))
+    }
+    pub fn check(_: N1, _: N2) -> Option<Self> {
+        Self::try_create()
     }
 }
 impl<N: Nat> Equiv<N, N> {

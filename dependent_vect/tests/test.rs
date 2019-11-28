@@ -91,3 +91,9 @@ fn pushing() {
     let v = v.push(2);
     assert_eq!(v.into_native(), vec![1, 2]);
 }
+
+#[test]
+fn get_fin() {
+    let (_, v) = vect!(vec![1]);
+    assert_eq!(v[Fin::from_usize(0).expect("Assertion failed: vec appears to be empty")], 1);
+}

@@ -26,3 +26,24 @@ impl<N1: Nat, N2: Nat> Nat for Add<N1, N2> {
         Self::get_usize().map(|_| Self(PhantomData))
     }
 }
+
+#[derive(Copy, Clone)]
+pub struct Less<N1: Nat, N2: Nat>(PhantomData<(N1, N2)>);
+impl<N1: Nat, N2: Nat> Less<N1, N2> {
+    pub fn try_get() -> Option<Self> {
+        N1::get_usize().and_then(|n1| {
+            N2::get_usize().and_then(|n2| {
+                if n1 < n2 {
+                    Some(Self(PhantomData))
+                } else {
+                    None
+                }
+            })
+        })
+    }
+    pub fn check(_: N1, _: N2) -> Option<Self> {
+        Self::try_get()
+    }
+}
+
+// here can be more implementations (Sub, Mul etc.), but let us stop here for now
