@@ -25,12 +25,13 @@ pub struct IterUntil<N: Nat>(usize, PhantomData<N>);
 impl<N: Nat> Iterator for IterUntil<N> {
     type Item = Fin<N>;
     fn next(&mut self) -> Option<Fin<N>> {
-        self.0 += 1;
-        if self.0 < N::get_usize().unwrap() {
+        let ret = if self.0 < N::get_usize().unwrap() {
             Some(Fin(self.0, PhantomData))
         } else {
             None
-        }
+        };
+        self.0 += 1;
+        ret
     }
 }
 

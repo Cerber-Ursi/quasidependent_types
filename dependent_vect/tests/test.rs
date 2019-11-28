@@ -101,9 +101,14 @@ fn get_fin() {
 #[test]
 fn find() {
     let (_, v) = vect!(vec![1, 2, 3]);
-    let n1 = v.find_index(|&n| n == 2);
-    assert_eq!(n1.map(Fin::as_usize), Some(1));
-    let n1 = n1.unwrap();
-    assert_eq!(v[n1], 2);
+
+    let n = v.find_index(|&n| n == 1);
+    assert_eq!(n.map(Fin::as_usize), Some(0));
+    assert_eq!(v[n.unwrap()], 1);
+
+    let n = v.find_index(|&n| n == 2);
+    assert_eq!(n.map(Fin::as_usize), Some(1));
+    assert_eq!(v[n.unwrap()], 2);
+
     assert_eq!(v.find_index(|&n| n == 0).map(Fin::as_usize), None);
 }
