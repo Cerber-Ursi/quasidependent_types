@@ -32,7 +32,7 @@ pub fn collect<Item: Clone, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = It
 #[macro_export]
 macro_rules! vect {
     ($data:expr) => {
-        with_n! {
+        ::dependent_nat::with_n! {
             let v = $data;
             $crate::collect::<_, _, N, _>(v)
         }

@@ -10,3 +10,4 @@ edition = "2018"
 dependent = { "path" = "../dependent" }
 dependent_nat = { "path" = "../dependent_nat", features = ["typenum_consts", "nat_ops", "fin"] }
 typenum = "1.11"
+trybuild = "1.0.17"
