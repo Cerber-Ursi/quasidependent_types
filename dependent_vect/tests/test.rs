@@ -97,3 +97,13 @@ fn get_fin() {
     let (_, v) = vect!(vec![1]);
     assert_eq!(v[Fin::from_usize(0).expect("Assertion failed: vec appears to be empty")], 1);
 }
+
+#[test]
+fn find() {
+    let (_, v) = vect!(vec![1, 2, 3]);
+    let n1 = v.find_index(|&n| n == 2);
+    assert_eq!(n1.map(Fin::as_usize), Some(1));
+    let n1 = n1.unwrap();
+    assert_eq!(v[n1], 2);
+    assert_eq!(v.find_index(|&n| n == 0).map(Fin::as_usize), None);
+}

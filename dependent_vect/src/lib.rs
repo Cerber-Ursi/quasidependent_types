@@ -50,6 +50,9 @@ impl<Item: Clone, N: Nat> Vect<Item, N> {
         self.0.extend(std::iter::once(item));
         Vect(self.0, PhantomData)
     }
+    pub fn find_index(&self, mut pred: impl FnMut(&Item) -> bool) -> Option<Fin<N>> {
+        N::iter_until().find(|&n| pred(&self[n])) 
+    }
 }
 
 impl<Item: Clone, N: Nat> Index<Fin<N>> for Vect<Item, N> {
