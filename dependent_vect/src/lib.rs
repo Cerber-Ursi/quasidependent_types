@@ -1,7 +1,6 @@
 use dependent::*;
 use dependent_nat::*;
 use std::marker::PhantomData;
-use std::ops::Index;
 
 #[derive(Clone)]
 pub struct Vect<T, N: Nat>(Vec<T>, PhantomData<N>);
@@ -45,9 +44,3 @@ impl<Item: Clone, N: Nat> Vect<Item, N> {
     }
 }
 
-impl<Item: Clone, N: Nat> Index<Fin<N>> for Vect<Item, N> {
-    type Output = Item;
-    fn index(&self, index: Fin<N>) -> &Item {
-        unsafe { self.0.get_unchecked(index.as_usize()) }
-    }
-}
