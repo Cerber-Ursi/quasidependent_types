@@ -7,11 +7,15 @@ jobs:
     runs-on: ubuntu-latest 
     steps:
     - uses: actions/checkout@v1
+    - name: Version
+      run: cargo --version
     - name: Run tests
       run: cargo test --verbose
   test-windows:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
+    - name: Version
+      run: cargo --version
     - name: Run tests
       run: cargo test --verbose
