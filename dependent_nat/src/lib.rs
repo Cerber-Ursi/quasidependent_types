@@ -1,23 +1,10 @@
 #![feature(proc_macro_hygiene)]
-#![feature(log_syntax)]
-
-mod eq;
-mod holder;
 
 mod timestamped;
 
 pub fn expect_nat<N: Nat>(s: usize) -> N {
-    use NatStoreError::*;
-    N::from_usize(s).unwrap_or_else(|err| match err {
-        Concurrent => panic!("Attempted to concurrently create multiple instances of Nat"),
-        AlreadyStored(val) => panic!(format!(
-            "Attempted to override already stored value {} with {}",
-            val, s
-        )),
-    })
+    N::from_usize(s).unwrap()
 }
 
-pub use self::eq::*;
-pub use self::holder::*;
 pub use self::timestamped::nat::*;
 

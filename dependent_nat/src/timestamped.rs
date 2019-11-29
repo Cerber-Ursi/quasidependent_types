@@ -6,7 +6,7 @@ pub mod nat {
     pub trait Nat: Sized + NatInner + Clone + Copy {
         fn get_usize() -> Option<usize>;
         fn as_usize(self) -> usize;
-        fn from_usize(s: usize) -> Result<Self, crate::NatStoreError>;
+        fn from_usize(s: usize) -> Result<Self, ()>;
         fn get() -> Self;
         fn try_get() -> Option<Self>;
     }
@@ -14,26 +14,24 @@ pub mod nat {
     #[macro_export]
     macro_rules! with_n {
         ($($inner:tt)*) => {{
-            use $crate::NatHolder;
-            static HOLDER: NatHolder = NatHolder::new();
             #[derive(Copy, Clone)]
             struct N;
             impl $crate::NatInner for N {}
             impl $crate::Nat for N {
                 fn get_usize() -> Option<usize> {
-                    HOLDER.read()
+                    Some(0)
                 }
                 fn as_usize(self) -> usize {
-                    HOLDER.read().expect(concat!("Nat value was created without setting its value. Please report this bug to ", env!("CARGO_PKG_REPOSITORY"), "/issues"))
+                    0 
                 }
-                fn from_usize(s: usize) -> Result<Self, $crate::NatStoreError> {
-                    HOLDER.store(s).map(|_| Self)
+                fn from_usize(s: usize) -> Result<Self, ()> {
+                    Ok(Self)
                 }
                 fn get() -> Self {
-                    Self::try_get().expect("Trying to create `Add` instance which is yet undefined")
+                    Self
                 }
                 fn try_get() -> Option<Self> {
-                    Self::get_usize().map(|_| Self)
+                    Some(Self)
                 }
             }
             $($inner)*

@@ -8,5 +8,4 @@ edition = "2018"
 
 [dependencies]
 dependent_nat = { "path" = "../dependent_nat" }
-typenum = "1.11"
 trybuild = "1.0.17"
