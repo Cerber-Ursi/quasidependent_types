@@ -1,6 +1,5 @@
 #[macro_use]
 pub mod nat {
-    use crate::eq::Equiv;
 
     /// Inner trait, not to be used by consumers directly. Its name is labeled with timestamp on every build.
     pub trait NatInner {}
@@ -11,12 +10,6 @@ pub mod nat {
         fn get() -> Self;
         fn try_get() -> Option<Self>;
     }
-    pub trait NatWrapper: Nat {
-        fn refl(self) -> Equiv<Self, Self> {
-            Equiv::refl()
-        }
-    }
-    impl<N: Nat> NatWrapper for N {}
 
     #[macro_export]
     macro_rules! with_n {
@@ -45,51 +38,6 @@ pub mod nat {
             }
             $($inner)*
         }};
-    }
-
-    #[cfg(feature = "typenum_consts")]
-    mod typenum_consts {
-        use super::*;
-        use crate::NatStoreError;
-        use typenum::Unsigned;
-        impl<T: Unsigned> NatInner for T {}
-        impl<T: Unsigned + Default + Copy + Clone> Nat for T {
-            fn get_usize() -> Option<usize> {
-                Some(Self::USIZE)
-            }
-            fn as_usize(self) -> usize {
-                Self::USIZE
-            }
-            fn from_usize(s: usize) -> Result<Self, NatStoreError> {
-                if s == Self::USIZE {
-                    Ok(Self::default())
-                } else {
-                    Err(NatStoreError::AlreadyStored(Self::USIZE))
-                }
-            }
-            fn get() -> Self {
-                Self::default()
-            }
-            fn try_get() -> Option<Self> {
-                Some(Self::default())
-            }
-        }
-    }
-    #[cfg(feature = "typenum_consts")]
-    pub use self::typenum_consts::*;
-
-}
-
-#[cfg(test)]
-mod test {
-
-    use super::nat::*;
-
-    #[test]
-    fn smoke() {
-        let _ = with_n! {
-            N::from_usize(1)
-        };
     }
 
 }
