@@ -1,6 +1,3 @@
-use dependent_attribute::label_timestamp;
-
-#[label_timestamp(NatInner)]
 #[macro_use]
 pub mod nat {
     use crate::eq::Equiv;

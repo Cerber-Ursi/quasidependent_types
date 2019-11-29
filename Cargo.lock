@@ -5,19 +5,9 @@ name = "dependent"
 version = "0.1.0"
 
 [[package]]
-name = "dependent_attribute"
-version = "0.1.0"
-dependencies = [
- "proc-macro2 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "syn 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "dependent_nat"
 version = "0.1.0"
 dependencies = [
- "dependent_attribute 0.1.0",
  "typenum 1.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

@@ -1,7 +1,6 @@
 [workspace]
 members = [
   "dependent",
-  "dependent_attribute",
   "dependent_vect",
   "dependent_nat"
 ]
