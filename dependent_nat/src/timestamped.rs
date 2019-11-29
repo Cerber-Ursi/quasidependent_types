@@ -81,12 +81,6 @@ pub mod nat {
     #[cfg(feature = "typenum_consts")]
     pub use self::typenum_consts::*;
 
-    #[cfg(feature = "nat_ops")]
-    mod nat_ops {
-        use super::*;
-        use crate::ops::*;
-        impl<N1: Nat, N2: Nat> NatInner for Add<N1, N2> {}
-    }
 }
 
 #[cfg(test)]

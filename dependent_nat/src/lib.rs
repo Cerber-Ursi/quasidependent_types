@@ -4,9 +4,6 @@
 mod eq;
 mod holder;
 
-#[cfg(feature = "nat_ops")]
-mod ops;
-
 mod timestamped;
 
 pub fn expect_nat<N: Nat>(s: usize) -> N {
@@ -23,7 +20,4 @@ pub fn expect_nat<N: Nat>(s: usize) -> N {
 pub use self::eq::*;
 pub use self::holder::*;
 pub use self::timestamped::nat::*;
-
-#[cfg(feature = "nat_ops")]
-pub use self::ops::*;
 
