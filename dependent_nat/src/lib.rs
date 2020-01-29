@@ -1,6 +1,3 @@
-#![feature(proc_macro_hygiene)]
-#![feature(log_syntax)]
-
 mod eq;
 mod holder;
 
