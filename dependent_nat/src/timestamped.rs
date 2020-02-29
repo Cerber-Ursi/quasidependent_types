@@ -40,7 +40,7 @@ pub mod nat {
                     HOLDER.store(s).map(|_| Self)
                 }
                 fn get() -> Self {
-                    Self::try_get().expect("Trying to create `Add` instance which is yet undefined")
+                    Self::try_get().expect("Trying to `get` the number which is yet undefined")
                 }
                 fn try_get() -> Option<Self> {
                     Self::get_usize().map(|_| Self)
