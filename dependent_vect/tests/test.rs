@@ -16,16 +16,6 @@ fn zip_sum<T: Clone + Add<T, Output = T>, N: Nat>(
     v1
 }
 
-macro_rules! parse_i64_discarding {
-    ($string:literal) => {
-        vect! {{
-            use std::str::FromStr;
-            let string: &str = &*$string;
-            string.split(",").map(i64::from_str).filter_map(Result::ok)
-        }}
-    };
-}
-
 #[test]
 fn summing() {
     let (n1, v1) = vect!(vec![1]);
@@ -61,10 +51,20 @@ fn mismatch() {
 
 #[test]
 fn runtime_size() {
+    macro_rules! parse_i64_discarding {
+        ($string:literal) => {
+            vect! {{
+                use std::str::FromStr;
+                let string: &str = &*$string;
+                string.split(",").map(i64::from_str).filter_map(Result::ok)
+            }}
+        };
+    }
+
     let (n1, v1) = parse_i64_discarding!("1,2,3,four,5");
     let (n2, v2) = parse_i64_discarding!("1,two,3,4,5");
     assert_eq!(
-        Equiv::check(n1, n2).map(|proof| zip_sum(v1, v2.retag(proof.rev())).into_native()),
+        Equiv::check(n1, n2).map(|proof| zip_sum(v1.retag(proof), v2).into_native()),
         Some(vec![2, 5, 7, 10])
     );
 }
@@ -78,7 +78,7 @@ fn fixed_size() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Attempted to override already stored value 2 with 1")]
 fn fixed_size_mismatch() {
     use dependent_vect::collect;
     use typenum::consts::*;
@@ -95,20 +95,21 @@ fn pushing() {
 #[test]
 fn get_fin() {
     let (_, v) = vect!(vec![1]);
-    assert_eq!(v[Fin::from_usize(0).expect("Assertion failed: vec appears to be empty")], 1);
+    let index = Fin::from_usize(0).expect("Assertion failed: vec appears to be empty");
+    assert_eq!(v[index], 1);
 }
 
 #[test]
 fn find() {
-    let (_, v) = vect!(vec![1, 2, 3]);
+    let (_, v) = vect!(vec![10, 20, 30]);
 
-    let n = v.find_index(|&n| n == 1);
+    let n = v.find_index(|&n| n == 10);
     assert_eq!(n.map(Fin::as_usize), Some(0));
-    assert_eq!(v[n.unwrap()], 1);
+    assert_eq!(v[n.unwrap()], 10);
 
-    let n = v.find_index(|&n| n == 2);
+    let n = v.find_index(|&n| n == 20);
     assert_eq!(n.map(Fin::as_usize), Some(1));
-    assert_eq!(v[n.unwrap()], 2);
+    assert_eq!(v[n.unwrap()], 20);
 
     assert_eq!(v.find_index(|&n| n == 0).map(Fin::as_usize), None);
 }

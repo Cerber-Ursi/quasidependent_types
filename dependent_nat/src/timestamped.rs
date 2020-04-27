@@ -3,8 +3,6 @@ use dependent_attribute::label_timestamp;
 #[label_timestamp(NatInner)]
 #[macro_use]
 pub mod nat {
-    use crate::eq::Equiv;
-
     /// Inner trait, not to be used by consumers directly. Its name is labeled with timestamp on every build.
     pub trait NatInner {}
     pub trait Nat: Sized + NatInner + Clone + Copy {
@@ -14,19 +12,13 @@ pub mod nat {
         fn get() -> Self;
         fn try_get() -> Option<Self>;
     }
-    pub trait NatWrapper: Nat {
-        fn refl(self) -> Equiv<Self, Self> {
-            Equiv::refl()
-        }
-    }
-    impl<N: Nat> NatWrapper for N {}
 
     #[macro_export]
     macro_rules! with_n {
         ($($inner:tt)*) => {{
             use $crate::NatHolder;
             static HOLDER: NatHolder = NatHolder::new();
-            #[derive(Copy, Clone)]
+            #[derive(Copy, Clone, Debug)]
             struct N;
             impl $crate::NatInner for N {}
             impl $crate::Nat for N {
@@ -55,6 +47,7 @@ pub mod nat {
         use super::*;
         use crate::NatStoreError;
         use typenum::Unsigned;
+
         impl<T: Unsigned> NatInner for T {}
         impl<T: Unsigned + Default + Copy + Clone> Nat for T {
             fn get_usize() -> Option<usize> {
@@ -100,5 +93,4 @@ mod test {
             N::from_usize(1)
         };
     }
-
 }

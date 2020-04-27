@@ -1,7 +1,7 @@
 use crate::Nat;
 use std::marker::PhantomData;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Fin<N: Nat>(usize, PhantomData<N>);
 
 impl<N: Nat> Fin<N> {

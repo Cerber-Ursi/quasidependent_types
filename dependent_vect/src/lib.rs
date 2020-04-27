@@ -5,7 +5,7 @@ use std::ops::Index;
 
 #[derive(Clone)]
 pub struct Vect<T, N: Nat>(Vec<T>, PhantomData<N>);
-impl<Item: Clone, N: Nat> Dependent for Vect<Item, N> {
+impl<Item, N: Nat> Dependent for Vect<Item, N> {
     type Native = Vec<Item>;
     type Frozen = [Item];
     fn freeze(&self) -> &Self::Frozen {
@@ -22,7 +22,7 @@ impl<Item: Clone, N: Nat> Dependent for Vect<Item, N> {
     }
 }
 
-pub fn collect<Item: Clone, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
+pub fn collect<Item, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
     iter: I,
 ) -> (N, Vect<Item, N>) {
     let inner: Vec<_> = iter.into_iter().collect();
@@ -39,23 +39,26 @@ macro_rules! vect {
     };
 }
 
-impl<Item: Clone, N: Nat> Vect<Item, N> {
+impl<Item, N: Nat> Vect<Item, N> {
     pub fn retag<New: Nat>(self, _proof: Equiv<N, New>) -> Vect<Item, New> {
         Vect(self.0, PhantomData)
     }
+
     pub fn size_refl(&self) -> Equiv<N, N> {
         Equiv::refl()
     }
+
     pub fn push(mut self, item: Item) -> Vect<Item, Add<N, typenum::consts::U1>> {
         self.0.extend(std::iter::once(item));
         Vect(self.0, PhantomData)
     }
+
     pub fn find_index(&self, mut pred: impl FnMut(&Item) -> bool) -> Option<Fin<N>> {
-        N::iter_until().find(|&n| pred(&self[n])) 
+        N::iter_until().find(|&n| pred(&self[n]))
     }
 }
 
-impl<Item: Clone, N: Nat> Index<Fin<N>> for Vect<Item, N> {
+impl<Item, N: Nat> Index<Fin<N>> for Vect<Item, N> {
     type Output = Item;
     fn index(&self, index: Fin<N>) -> &Item {
         unsafe { self.0.get_unchecked(index.as_usize()) }

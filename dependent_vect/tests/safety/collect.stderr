@@ -8,10 +8,10 @@ error[E0283]: type annotations needed for `(N, dependent_vect::Vect<T, N>)`
    |         |   help: consider specifying the type arguments in the function call: `collect::<Item, N, N2, I>`
    |         consider giving this pattern the explicit type `(N, dependent_vect::Vect<T, N>)`, where the type parameter `N` is specified
    | 
-  ::: $WORKSPACE/dependent_vect/src/lib.rs:25:32
+  ::: $WORKSPACE/dependent_vect/src/lib.rs:25:25
    |
-25 | pub fn collect<Item: Clone, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
-   |                                --- required by this bound in `dependent_vect::collect`
+25 | pub fn collect<Item, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
+   |                         --- required by this bound in `dependent_vect::collect`
    |
    = note: cannot resolve `_: dependent_nat::timestamped::nat::Nat`
 
@@ -24,9 +24,9 @@ error[E0283]: type annotations needed
    |         cannot infer type for type parameter `N2` declared on the function `collect`
    |         help: consider specifying the type arguments in the function call: `collect::<Item, N, N2, I>`
    | 
-  ::: $WORKSPACE/dependent_vect/src/lib.rs:25:47
+  ::: $WORKSPACE/dependent_vect/src/lib.rs:25:40
    |
-25 | pub fn collect<Item: Clone, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
-   |                                               ------- required by this bound in `dependent_vect::collect`
+25 | pub fn collect<Item, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
+   |                                        ------- required by this bound in `dependent_vect::collect`
    |
    = note: cannot resolve `_: std::convert::From<test_2::N>`

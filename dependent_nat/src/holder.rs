@@ -28,9 +28,11 @@ impl NatHolder {
     pub const fn new() -> Self {
         Self {
             init_state: InitState::Value::new(InitState::UNINIT),
+            // We can store any value here, since we can't read it anyway, while init_state is not INIT
             value: AtomicUsize::new(0),
         }
     }
+
     pub fn store(&self, value: usize) -> Result<(), NatStoreError> {
         if self.init_state.compare_and_swap(
             InitState::UNINIT,
@@ -50,6 +52,7 @@ impl NatHolder {
         self.init_state.store(InitState::INIT, Ordering::Release);
         Ok(())
     }
+
     pub fn read(&self) -> Option<usize> {
         if self.init_state.load(Ordering::Acquire) == InitState::INIT {
             Some(self.value.load(Ordering::Relaxed))
@@ -58,6 +61,3 @@ impl NatHolder {
         }
     }
 }
-
-// This is actually safe, since we are guarding Cell with atomics.
-unsafe impl Sync for NatHolder {}
