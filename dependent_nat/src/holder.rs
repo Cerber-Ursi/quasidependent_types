@@ -1,4 +1,5 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
+use thiserror::Error;
 
 #[allow(non_snake_case)]
 mod InitState {
@@ -15,9 +16,12 @@ mod InitState {
     pub(super) const INIT: u8 = States::Init as _;
 }
 
+#[derive(Debug, Error)]
 pub enum NatStoreError {
+    #[error("Attempted to concurrently create multiple instances of N: Nat")]
     Concurrent,
-    AlreadyStored(usize),
+    #[error("Attempted to override already stored value {0} with {1}")]
+    AlreadyStored(usize, usize),
 }
 
 pub struct NatHolder {
@@ -44,7 +48,7 @@ impl NatHolder {
                 if cur == value {
                     Ok(())
                 } else {
-                    Err(NatStoreError::AlreadyStored(cur))
+                    Err(NatStoreError::AlreadyStored(cur, value))
                 }
             });
         }

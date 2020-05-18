@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 dependent_attribute = { path = "../dependent_attribute" }
 typenum = { "version" = "1.11", "optional" = true }
+thiserror = "1.0.18"
 
 [features]
 default = ["typenum_consts", "nat_ops", "fin"]

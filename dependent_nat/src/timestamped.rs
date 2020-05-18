@@ -60,7 +60,7 @@ pub mod nat {
                 if s == Self::USIZE {
                     Ok(Self::default())
                 } else {
-                    Err(NatStoreError::AlreadyStored(Self::USIZE))
+                    Err(NatStoreError::AlreadyStored(Self::USIZE, s))
                 }
             }
             fn get() -> Self {

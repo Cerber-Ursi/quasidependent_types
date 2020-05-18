@@ -40,7 +40,7 @@ fn update(item: proc_macro2::TokenStream, from: &Ident, to: &Ident) -> proc_macr
                 new_group.set_span(group.span());
                 TokenTree::Group(new_group)
             }
-            TokenTree::Ident(ident) if ident.to_string() == from.to_string() => {
+            TokenTree::Ident(ident) if &ident == from => {
                 let mut to = to.clone();
                 to.set_span(ident.span());
                 TokenTree::Ident(to)

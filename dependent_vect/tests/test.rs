@@ -7,7 +7,7 @@ fn zip_sum<T: Clone + Add<T, Output = T>, N: Nat>(
     first: Vect<T, N>,
     second: Vect<T, N>,
 ) -> Vect<T, N> {
-    let mut v1 = first.clone();
+    let mut v1 = first;
     let v2 = second.freeze();
     v1.freeze_mut()
         .iter_mut()

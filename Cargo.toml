@@ -3,5 +3,6 @@ members = [
   "dependent",
   "dependent_attribute",
   "dependent_vect",
-  "dependent_nat"
+  "dependent_nat",
+  "dependent_eq"
 ]
