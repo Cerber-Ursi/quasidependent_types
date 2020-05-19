@@ -1,8 +1,7 @@
 [workspace]
 members = [
-  "dependent",
-  "dependent_attribute",
-  "dependent_vect",
-  "dependent_nat",
-  "dependent_eq"
+  "qd_trait",
+  "qd_timestamp_marker",
+  "qd_nat",
+  "qd_vect",
 ]

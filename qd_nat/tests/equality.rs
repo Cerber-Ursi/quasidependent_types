@@ -1,12 +1,12 @@
-use dependent_nat::{Nat, Equiv};
+use qd_nat::{Nat, Equiv};
 
-pub fn accepts_pair<N1: Nat, N2: Nat>(n1: N1, n2: N2, _proof: Equiv<N1, N2>) {
+fn accepts_pair<N1: Nat, N2: Nat>(n1: N1, n2: N2, _proof: Equiv<N1, N2>) {
     assert_eq!(n1.as_usize(), n2.as_usize()); // never fails
 }
 
 #[test]
 fn test_pair() {
-    use dependent_nat::with_n;
+    use qd_nat::with_n;
 
     let n = with_n!(N::from_usize(1).unwrap());
     let n1 = with_n!(N::from_usize(1).unwrap());

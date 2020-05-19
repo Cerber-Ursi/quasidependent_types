@@ -1,4 +1,4 @@
-use dependent_vect::{vect, collect};
+use qd_vect::{vect, collect};
 
 fn test_1() {
     let _ = collect(vec![]);

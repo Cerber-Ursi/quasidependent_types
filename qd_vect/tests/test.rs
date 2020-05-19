@@ -1,6 +1,6 @@
-use dependent::*;
-use dependent_nat::*;
-use dependent_vect::{vect, Vect};
+use qd_trait::*;
+use qd_nat::*;
+use qd_vect::{vect, Vect};
 use std::ops::Add;
 
 fn zip_sum<T: Clone + Add<T, Output = T>, N: Nat>(
@@ -71,7 +71,7 @@ fn runtime_size() {
 
 #[test]
 fn fixed_size() {
-    use dependent_vect::collect;
+    use qd_vect::collect;
     use typenum::consts::*;
     let (_, v) = collect::<_, _, U2, _>(vec![1u32, 2]);
     assert_eq!(v.into_native(), vec![1u32, 2]);
@@ -80,7 +80,7 @@ fn fixed_size() {
 #[test]
 #[should_panic(expected = "Attempted to override already stored value 2 with 1")]
 fn fixed_size_mismatch() {
-    use dependent_vect::collect;
+    use qd_vect::collect;
     use typenum::consts::*;
     let _ = collect::<_, _, U2, _>(&[1]);
 }

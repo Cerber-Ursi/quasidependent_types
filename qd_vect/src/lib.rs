@@ -1,5 +1,5 @@
-use dependent::*;
-use dependent_nat::*;
+use qd_trait::*;
+use qd_nat::*;
 use std::marker::PhantomData;
 use std::ops::Index;
 
@@ -32,7 +32,7 @@ pub fn collect<Item, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
 #[macro_export]
 macro_rules! vect {
     ($data:expr) => {
-        ::dependent_nat::with_n! {
+        ::qd_nat::with_n! {
             let v = $data;
             $crate::collect::<_, _, N, _>(v)
         }

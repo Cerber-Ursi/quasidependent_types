@@ -1,5 +1,5 @@
 [package]
-name = "dependent_vect"
+name = "qd_vect"
 version = "0.1.0"
 authors = ["k.bagrov <k.bagrov@g.nsu.ru>"]
 edition = "2018"
@@ -7,7 +7,9 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dependent = { path = "../dependent" }
-dependent_nat = { path = "../dependent_nat", features = ["typenum_consts", "nat_ops", "fin"] }
+qd_trait = { path = "../qd_trait" }
+qd_nat = { path = "../qd_nat", features = ["typenum_consts", "nat_ops", "fin"] }
 typenum = "1.11"
+
+[dev-dependencies]
 trybuild = "1.0.17"

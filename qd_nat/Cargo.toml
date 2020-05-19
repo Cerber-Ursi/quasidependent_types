@@ -1,5 +1,5 @@
 [package]
-name = "dependent_nat"
+name = "qd_nat"
 version = "0.1.0"
 authors = ["k.bagrov <k.bagrov@g.nsu.ru>"]
 edition = "2018"
@@ -7,8 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dependent_attribute = { path = "../dependent_attribute" }
-typenum = { "version" = "1.11", "optional" = true }
+qd_timestamp_marker = { path = "../qd_timestamp_marker" }
+typenum = { version = "1.11", optional = true }
 thiserror = "1.0.18"
 
 [features]

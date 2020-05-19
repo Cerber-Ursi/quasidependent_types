@@ -1,4 +1,4 @@
-use dependent_attribute::label_timestamp;
+use qd_timestamp_marker::label_timestamp;
 
 #[label_timestamp(NatInner)]
 #[macro_use]

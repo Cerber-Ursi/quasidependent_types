@@ -1,5 +1,5 @@
 [package]
-name = "dependent"
+name = "qd_trait"
 version = "0.1.0"
 authors = ["dev"]
 edition = "2018"

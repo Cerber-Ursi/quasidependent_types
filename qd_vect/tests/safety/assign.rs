@@ -1,4 +1,4 @@
-use dependent_vect::vect;
+use qd_vect::vect;
 
 fn main() {
     let mut v1 = vect!{ vec![] };

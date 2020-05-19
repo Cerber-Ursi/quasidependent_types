@@ -1,4 +1,4 @@
-error[E0283]: type annotations needed for `(N, dependent_vect::Vect<T, N>)`
+error[E0283]: type annotations needed for `(N, qd_vect::Vect<T, N>)`
   --> $DIR/collect.rs:4:13
    |
 4  |     let _ = collect(vec![]);
@@ -6,14 +6,14 @@ error[E0283]: type annotations needed for `(N, dependent_vect::Vect<T, N>)`
    |         |   |
    |         |   cannot infer type for type parameter `N` declared on the function `collect`
    |         |   help: consider specifying the type arguments in the function call: `collect::<Item, N, N2, I>`
-   |         consider giving this pattern the explicit type `(N, dependent_vect::Vect<T, N>)`, where the type parameter `N` is specified
+   |         consider giving this pattern the explicit type `(N, qd_vect::Vect<T, N>)`, where the type parameter `N` is specified
    | 
-  ::: $WORKSPACE/dependent_vect/src/lib.rs:25:25
+  ::: $WORKSPACE/qd_vect/src/lib.rs:25:25
    |
 25 | pub fn collect<Item, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
-   |                         --- required by this bound in `dependent_vect::collect`
+   |                         --- required by this bound in `qd_vect::collect`
    |
-   = note: cannot resolve `_: dependent_nat::timestamped::nat::Nat`
+   = note: cannot resolve `_: qd_nat::timestamped::nat::Nat`
 
 error[E0283]: type annotations needed
   --> $DIR/collect.rs:9:9
@@ -24,9 +24,9 @@ error[E0283]: type annotations needed
    |         cannot infer type for type parameter `N2` declared on the function `collect`
    |         help: consider specifying the type arguments in the function call: `collect::<Item, N, N2, I>`
    | 
-  ::: $WORKSPACE/dependent_vect/src/lib.rs:25:40
+  ::: $WORKSPACE/qd_vect/src/lib.rs:25:40
    |
 25 | pub fn collect<Item, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
-   |                                        ------- required by this bound in `dependent_vect::collect`
+   |                                        ------- required by this bound in `qd_vect::collect`
    |
    = note: cannot resolve `_: std::convert::From<test_2::N>`
