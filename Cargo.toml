@@ -1,6 +1,6 @@
 [workspace]
 members = [
-  "qd_trait",
+  "qd_core",
   "qd_timestamp_marker",
   "qd_nat",
   "qd_vect",

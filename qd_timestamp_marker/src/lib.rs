@@ -6,7 +6,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use syn::*;
 
 #[proc_macro_attribute]
-pub fn label_timestamp(attr: TokenStream, input: TokenStream) -> TokenStream {
+pub fn marker(attr: TokenStream, input: TokenStream) -> TokenStream {
     let mut input = parse_macro_input!(input as ItemMod);
 
     let replaced = parse_macro_input!(attr as Ident);

@@ -1,6 +1,6 @@
-use qd_timestamp_marker::label_timestamp;
+use qd_timestamp_marker::marker;
 
-#[label_timestamp(NatInner)]
+#[marker(NatInner)]
 #[macro_use]
 pub mod nat {
     /// Inner trait, not to be used by consumers directly. Its name is labeled with timestamp on every build.
