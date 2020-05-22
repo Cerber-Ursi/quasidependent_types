@@ -16,8 +16,8 @@ pub fn expect_nat<N: Nat>(s: usize) -> N {
 
 pub use self::eq::*;
 pub use self::holder::*;
-pub use self::timestamped::nat::*;
 pub use self::primitive::Primitive;
+pub use self::timestamped::nat::*;
 
 #[cfg(feature = "nat_ops")]
 pub use self::ops::*;

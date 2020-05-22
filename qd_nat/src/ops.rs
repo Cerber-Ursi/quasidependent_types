@@ -1,5 +1,5 @@
-use crate::{Nat, NatStoreError, Equiv};
-use qd_core::{StaticallyProvable, Deducible};
+use crate::{Equiv, Nat, NatStoreError};
+use qd_core::{Deducible, StaticallyProvable};
 use std::marker::PhantomData;
 
 #[derive(Copy, Clone)]

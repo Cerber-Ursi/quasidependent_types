@@ -1,6 +1,6 @@
 use super::{Nat, Primitive};
-use std::marker::PhantomData;
 use qd_core::{Deducible, StaticallyProvable};
+use std::marker::PhantomData;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Equiv<N1: Nat, N2: Nat>(pub(crate) PhantomData<(N1, N2)>);
