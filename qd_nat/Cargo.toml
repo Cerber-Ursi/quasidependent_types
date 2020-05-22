@@ -7,6 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+qd_core = { path = "../qd_core" }
 qd_timestamp_marker = { path = "../qd_timestamp_marker" }
 typenum = { version = "1.11", optional = true }
 thiserror = "1.0.18"

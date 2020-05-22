@@ -1,6 +1,6 @@
-use qd_timestamp_marker::marker;
+use qd_timestamp_marker::timestamp_marker;
 
-#[marker(NatInner)]
+#[timestamp_marker(NatInner)]
 #[macro_use]
 pub mod nat {
     /// Inner trait, not to be used by consumers directly. Its name is labeled with timestamp on every build.
@@ -38,6 +38,7 @@ pub mod nat {
                     Self::get_usize().map(|_| Self)
                 }
             }
+            impl $crate::Primitive for N {}
             $($inner)*
         }};
     }
@@ -45,7 +46,7 @@ pub mod nat {
     #[cfg(feature = "typenum_consts")]
     mod typenum_consts {
         use super::*;
-        use crate::NatStoreError;
+        use crate::{primitive::Primitive, NatStoreError};
         use typenum::Unsigned;
 
         impl<T: Unsigned> NatInner for T {}
@@ -70,6 +71,7 @@ pub mod nat {
                 Some(Self::default())
             }
         }
+        impl<T: Unsigned + Nat> Primitive for T {}
     }
     #[cfg(feature = "typenum_consts")]
     pub use self::typenum_consts::*;

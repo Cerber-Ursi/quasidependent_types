@@ -24,9 +24,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "qd_core"
+version = "0.1.0"
+
+[[package]]
 name = "qd_nat"
 version = "0.1.0"
 dependencies = [
+ "qd_core 0.1.0",
  "qd_timestamp_marker 0.1.0",
  "thiserror 1.0.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "typenum 1.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -42,15 +47,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "qd_trait"
-version = "0.1.0"
-
-[[package]]
 name = "qd_vect"
 version = "0.1.0"
 dependencies = [
+ "qd_core 0.1.0",
  "qd_nat 0.1.0",
- "qd_trait 0.1.0",
  "trybuild 1.0.18 (registry+https://github.com/rust-lang/crates.io-index)",
  "typenum 1.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

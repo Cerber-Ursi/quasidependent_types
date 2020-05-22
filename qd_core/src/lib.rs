@@ -9,3 +9,17 @@ pub trait Dependent {
     fn into_native(self) -> Self::Native;
     fn as_native(&self) -> &Self::Native;
 }
+
+pub trait StaticallyProvable {
+    fn proof() -> Self;
+}
+
+pub trait Deducible<Reason> {
+    fn deduce(_: Reason) -> Self;
+}
+
+impl<T: StaticallyProvable> Deducible<()> for T {
+    fn deduce(_: ()) -> Self {
+        Self::proof()
+    }
+}

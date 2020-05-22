@@ -1,4 +1,4 @@
-use qd_trait::*;
+use qd_core::*;
 use qd_nat::*;
 use qd_vect::{vect, Vect};
 use std::ops::Add;
@@ -112,4 +112,28 @@ fn find() {
     assert_eq!(v[n.unwrap()], 20);
 
     assert_eq!(v.find_index(|&n| n == 0).map(Fin::as_usize), None);
+}
+
+#[test]
+fn concats() {
+    let (_, v1) = vect!(vec![1]);
+    let (n2, v2) = vect!(vec![2, 3]);
+
+    let v12 = v1.clone().concat(v2.clone());
+    let v21 = v2.clone().concat(v1.clone());
+
+    let sum = zip_sum(v12, v21.retag(Equiv::proof()));
+    assert_eq!(sum.into_native(), vec![3, 5, 4]);
+
+    let (n3, v3) = vect!(vec![4, 5]);
+    let v12 = v1.clone().concat(v2);
+    let v13 = v1.concat(v3);
+
+    match Equiv::check(n2, n3) {
+        Some(proof) => {
+            let sum = zip_sum(v12.retag(Equiv::deduce(proof)), v13);
+            assert_eq!(sum.into_native(), vec![2, 6, 8]);
+        }
+        None => panic!("2 != 2, WTF?"),
+    }
 }

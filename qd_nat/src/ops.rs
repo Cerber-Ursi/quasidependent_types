@@ -1,4 +1,5 @@
-use crate::{Nat, NatStoreError};
+use crate::{Nat, NatStoreError, Equiv};
+use qd_core::{StaticallyProvable, Deducible};
 use std::marker::PhantomData;
 
 #[derive(Copy, Clone)]
@@ -28,3 +29,15 @@ impl<N1: Nat, N2: Nat> Nat for Add<N1, N2> {
 }
 
 // here can be more implementations (Sub, Mul etc.), but let us stop here for now
+
+impl<N1: Nat, N2: Nat> StaticallyProvable for Equiv<Add<N1, N2>, Add<N2, N1>> {
+    fn proof() -> Self {
+        Self(PhantomData)
+    }
+}
+
+impl<M: Nat, N1: Nat, N2: Nat> Deducible<Equiv<N1, N2>> for Equiv<Add<M, N1>, Add<M, N2>> {
+    fn deduce(_: Equiv<N1, N2>) -> Self {
+        Self(PhantomData)
+    }
+}

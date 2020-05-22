@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-qd_trait = { path = "../qd_trait" }
+qd_core = { path = "../qd_core" }
 qd_nat = { path = "../qd_nat", features = ["typenum_consts", "nat_ops", "fin"] }
 typenum = "1.11"
 

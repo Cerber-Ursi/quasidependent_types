@@ -1,4 +1,4 @@
-use qd_trait::*;
+use qd_core::*;
 use qd_nat::*;
 use std::marker::PhantomData;
 use std::ops::Index;
@@ -55,6 +55,11 @@ impl<Item, N: Nat> Vect<Item, N> {
 
     pub fn find_index(&self, mut pred: impl FnMut(&Item) -> bool) -> Option<Fin<N>> {
         N::iter_until().find(|&n| pred(&self[n]))
+    }
+
+    pub fn concat<N2: Nat>(mut self, vect: Vect<Item, N2>) -> Vect<Item, Add<N, N2>> {
+        self.0.extend(vect.into_native());
+        Vect(self.0, PhantomData)
     }
 }
 

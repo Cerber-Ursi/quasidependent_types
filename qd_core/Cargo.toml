@@ -1,5 +1,5 @@
 [package]
-name = "qd_trait"
+name = "qd_core"
 version = "0.1.0"
 authors = ["dev"]
 edition = "2018"
