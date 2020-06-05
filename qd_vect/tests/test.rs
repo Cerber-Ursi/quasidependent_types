@@ -22,8 +22,25 @@ fn summing() {
     let (_, v2) = vect!(vec![1]);
 
     assert_eq!(
-        Equiv::check().map(|proof| zip_sum(v1, v2.retag(proof)).into_native()),
+        Equiv::check()
+            .map(|proof| v2.retag(proof))
+            .map(|v2| zip_sum(v1, v2))
+            .map(Vect::into_native),
         Some(vec![2])
+    );
+}
+
+#[test]
+fn summing_mismatch() {
+    let (_, v1) = vect!(vec![]);
+    let (_, v2) = vect!(vec![1]);
+
+    assert_eq!(
+        Equiv::check()
+            .map(|proof| v2.retag(proof))
+            .map(|v2| zip_sum(v1, v2))
+            .map(Vect::into_native),
+        None
     );
 }
 
