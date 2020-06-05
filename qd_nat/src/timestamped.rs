@@ -4,7 +4,7 @@ use qd_timestamp_marker::timestamp_marker;
 #[macro_use]
 pub mod nat {
     /// Inner trait, not to be used by consumers directly. Its name is labeled with timestamp on every build.
-    pub trait NatInner {}
+    pub unsafe trait NatInner {}
     pub trait Nat: Sized + NatInner + Clone + Copy {
         fn get_usize() -> Option<usize>;
         fn as_usize(self) -> usize;
@@ -20,7 +20,7 @@ pub mod nat {
             static HOLDER: NatHolder = NatHolder::new();
             #[derive(Copy, Clone, Debug)]
             struct N;
-            impl $crate::NatInner for N {}
+            unsafe impl $crate::NatInner for N {}
             impl $crate::Nat for N {
                 fn get_usize() -> Option<usize> {
                     HOLDER.read()
@@ -49,7 +49,7 @@ pub mod nat {
         use crate::{primitive::Primitive, NatStoreError};
         use typenum::Unsigned;
 
-        impl<T: Unsigned> NatInner for T {}
+        unsafe impl<T: Unsigned> NatInner for T {}
         impl<T: Unsigned + Default + Copy + Clone> Nat for T {
             fn get_usize() -> Option<usize> {
                 Some(Self::USIZE)
@@ -80,7 +80,7 @@ pub mod nat {
     mod nat_ops {
         use super::*;
         use crate::ops::*;
-        impl<N1: Nat, N2: Nat> NatInner for Add<N1, N2> {}
+        unsafe impl<N1: Nat, N2: Nat> NatInner for Add<N1, N2> {}
     }
 }
 
