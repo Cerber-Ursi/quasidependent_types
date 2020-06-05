@@ -285,5 +285,245 @@ fn zip_sum<T: Clone + Add<T, Output = T>, N: Nat>(
 ```
 Теперь, соответственно, перед нами встаёт вопрос, как нам получить объект `Vect` - а точнее, как вызвать определённую выше функцию `collect`, поскольку попытка это сделать "в лоб" приведёт к ошибке вроде такой:
 ```text
-
+error[E0283]: type annotations needed for `(N, Vect<u32, N>)`
+  --> ${MODULE}/tests/test.rs:7:13
+   |
+7  |     let _ = collect(vec![1u32]);
+   |         -   ^^^^^^^ cannot infer type for type parameter `N` declared on the function `collect`
+   |         |
+   |         consider giving this pattern the explicit type `(N, Vect<u32, N>)`, where the type parameter `N` is specified
+   | 
+  ::: ${MODULE}/src/lib.rs:28:32
+   |
+28 | pub fn collect<Item: Clone, N: Nat, I: IntoIterator<Item = Item>>(iter: I) -> (N, Vect<Item, N>) {
+   |                                --- required by this bound in `collect`
+   |
+   = note: cannot satisfy `_: Nat`
+help: consider specifying the type arguments in the function call
+   |
+7  |     let _ = collect::<Item, N, I>(vec![1u32]);
+   |                    ^^^^^^^^^^^^^^
 ```
+Первый - и кажущийся очевидным - вариант состоит в том, чтобы просто сгенерировать новый тип непосредственно перед вызовом функции, а затем передать его в качестве обобщённого параметра:
+```rust
+{
+    #[derive(Copy, Clone)]
+    struct N(usize);
+    impl Nat for N {
+        fn as_usize(&self) -> usize {
+            self.0
+        }
+        fn from_usize(s: usize) -> Self {
+            Self(s)
+        }
+    }
+    collect::<_, $n, _>($v)
+}
+```
+Однако с таким подходом возникает достаточно очевидная проблема: у нас нет никакого способа поддержать инвариант для типа `N`. Нет никаких гарантий, что кто-то не попытается определить этот тип, а затем вызвать `N::from_usize` с двумя разными аргументами.
+
+### `qd_timestamp_marker`: де-факто приватный типаж
+
+Выход из этой ситуации простой: типаж `Nat` должен быть реализован строго подконтрольным образом. Каким именно образом - мы опишем чуть ниже, а здесь разговор пойдёт о том, как добиться этой самой подконтрольности. Строго говоря - никак, но есть один относительно простой трюк, о сути которого можно догадаться из названия модуля.
+
+Допустим, мы подготовили реализацию нашего типажа `Nat` и предоставили возможность сгенерировать эту реализацию для нового типа через некоторый макрос:
+```rust
+#[macro_export]
+macro_rules! n {
+    () => {
+        #[derive(Copy, Clone)]
+        struct N(usize);
+        impl $crate::Nat for N {
+            // реализация
+        }
+    };
+}
+```
+Вопрос: что может помешать пользователю написать ровно тот же самый код от руки? В процессе работы над этим проектом я задал этот вопрос на форуме Rust (применительно к первому варианту реализации, но это не сильно что-то изменило), и получил на него в числе прочего [такой вот ответ](https://users.rust-lang.org/t/creating-code-to-be-run-through-macro-but-not-directly/33984/5), сводящийся к достаточно простой идее: написать процедурный макрос, который некоторым случайным (или не случайным, но и не постоянным) образом поменяет как определение типажа, так и реализующий его макрос. В этом случае реализовать типаж вручную будет невозможно - его имя будет генерироваться заново при каждой компиляции пакета.
+
+Что ж, пишем:
+
+<spoiler title="Полный код процедурного макроса">
+
+```rust
+extern crate proc_macro;
+
+use proc_macro::TokenStream;
+use quote::{format_ident, quote, ToTokens};
+use std::time::{SystemTime, UNIX_EPOCH};
+use syn::*;
+
+#[proc_macro_attribute]
+pub fn timestamp_marker(attr: TokenStream, input: TokenStream) -> TokenStream {
+    // Макрос будет преобразовывать модуль целиком, со всем содержимым
+    let mut input = parse_macro_input!(input as ItemMod);
+
+    // Идентификатор, который мы будем заменять, передадим как параметр
+    let replaced = parse_macro_input!(attr as Ident);
+    // А в качестве замены возьмём его же, но с приделанным текущим timestamp-ом
+    let replacement = format_ident!(
+        "{}{}",
+        replaced,
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_millis()
+    );
+
+    // Извлекаем содержимое модуля
+    let content = input
+        .content
+        .as_mut()
+        // Если его нет (т.е. модуль в отдельном файле) - паникуем, получим ошибку компиляции
+        .expect("Only the inline modules can be labeled with timestamp");
+    // И прогоняем каждый элемент через функцию замены (см. ниже)
+    content.1.iter_mut().for_each(|item| {
+        *item = parse2(update(item.to_token_stream(), &replaced, &replacement)).unwrap()
+    });
+
+    let output = quote! { #input };
+    output.into()
+}
+
+fn update(item: proc_macro2::TokenStream, from: &Ident, to: &Ident) -> proc_macro2::TokenStream {
+    use proc_macro2::*;
+    item.into_iter()
+        // Нас здесь интересует два основных варианта:
+        // либо перед нами группа (т.е. нечто в скобках),
+        // либо перед нами идентификатор.
+        .map(|tok| match tok {
+            TokenTree::Group(group) => {
+                // Группу мы обрабатываем рекурсивно,
+                let mut new_group = Group::new(group.delimiter(), update(group.stream(), from, to));
+                // не забывая указать новой группе корректное местоположение
+                new_group.set_span(group.span());
+                TokenTree::Group(new_group)
+            }
+            TokenTree::Ident(ident) if &ident == from => {
+                // Идентификатор мы меняем, только если он совпадает с заменяемым.
+                let mut to = to.clone();
+                // И, опять же, не забываем про местоположение.
+                to.set_span(ident.span());
+                TokenTree::Ident(to)
+            }
+            // Всё прочее оставляем как есть.
+            tok => tok,
+        })
+        .collect()
+}
+```
+</spoiler>
+
+### `qd_nat`: квазизависимые числа
+
+Так как типаж `Nat` используется во внешнем коде, непосредственно его пометить мы не можем. Обходится проблема очень просто:
+```rust
+#[timestamp_marker(NatInner)]
+pub mod nat {
+    pub trait NatInner {}
+    pub trait Nat: Sized + NatInner + Clone + Copy {
+        fn as_usize(&self) -> usize;
+        fn from_usize(s: usize) -> Self;
+    }
+}
+```
+Реализовать типаж `Nat` по-прежнему можно где угодно, и мы этим воспользуемся. А вот типаж `NatInner` - уже нет, и, следовательно, все реализации типажа `Nat` становятся нам подконтрольны.
+
+Теперь вернёмся к предложенному ранее варианту с макросом. Немного скорректируем его определение, а именно, будем принимать на вход последовательность выражений, в пределах которой искомый тип существует под именем `N`:
+```rust
+macro_rules! with_n {
+    ($($inner:tt)*) => {{
+        #[derive(Copy, Clone, Debug)]
+        struct N;
+        impl $crate::NatInner for N {}
+        impl $crate::Nat for N {
+            // тут реализация
+        }
+        $($inner)*
+    }};
+}
+```
+Обратите внимание, правая часть макроса содержит двойные фигурные скобки. За счёт этого генерируемый макросом код становится блоком и, во-первых, может использоваться как выражение - в частности, стоять в правой части оператора присваивания, - во-вторых, ограничивает область видимости определённых в нём элементов, в том числе и типа `N`, благодаря чему несколько вызовов `with_n` подряд не вызовут конфликтов.
+
+Пора заниматься самой реализацией. В нынешнем проекте она была построена следующим образом: каждый такой макрос создаёт статическую структуру определённого типа - по сути, write-only вариант для `AtomicUsize`, которая будет хранить однажды записанное значение и выдавать его по запросу. Не будем разбирать реализацию - просто скажем, что она по большей части опирается на код, приведённый [здесь](https://users.rust-lang.org/t/write-once-static-option/35033), ограничимся только интерфейсом:
+```rust
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum NatStoreError {
+    // Ошибка для случая, когда несколько вызовов `store()` были запущены одновременно
+    #[error("Attempted to concurrently create multiple instances of N: Nat")]
+    Concurrent,
+    // Ошибка для случая, когда мы попытались затереть уже сохранённое значение
+    #[error("Attempted to override already stored value {0} with {1}")]
+    AlreadyStored(usize, usize),
+}
+
+pub struct NatHolder { /* skipped */ }
+impl NatHolder {
+    pub const fn new() -> Self {
+        // skipped
+    }
+    pub fn store(&self, value: usize) -> Result<(), NatStoreError> {
+        // skipped
+    }
+    pub fn read(&self) -> Option<usize> {
+        // skipped
+    }
+}
+```
+А теперь - реализация. Заодно мы немного расширим API наших натуральных чисел, а именно, добавим возможность создавать объект, имея только тип, но не значение - это может пригодиться в обобщённом коде (хотя в нынешнем проекте эти методы не используются, но удалить их всё равно рука не поднялась):
+```rust
+pub trait Nat: Sized + NatInner + Clone + Copy {
+    fn get_usize() -> Option<usize>;
+    fn as_usize(self) -> usize;
+    fn from_usize(s: usize) -> Result<Self, crate::NatStoreError>;
+    fn get() -> Self;
+    fn try_get() -> Option<Self>;
+}
+
+#[macro_export]
+macro_rules! with_n {
+    ($($inner:tt)*) => {{
+        // пропуск
+        impl $crate::Nat for N {
+            fn get_usize() -> Option<usize> {
+                HOLDER.read()
+            }
+            fn as_usize(self) -> usize {
+                // Этот вызов никогда не должен проваливаться,
+                // т.к. раз объект создан, Holder должен быть уже инициализирован
+                HOLDER.read().unwrap();
+            }
+            fn from_usize(s: usize) -> Result<Self, $crate::NatStoreError> {
+                HOLDER.store(s).map(|_| Self)
+            }
+            fn get() -> Self {
+                Self::try_get().expect("Trying to `get` the number which is yet undefined")
+            }
+            fn try_get() -> Option<Self> {
+                Self::get_usize().map(|_| Self)
+            }
+        }
+        $($inner)*
+    }};
+}
+```
+Пора возвращаться к нашим векторам!
+
+### `qd_vect`: наконец-то создаём
+
+Для создания вектора мы используем совершенно тривиальную обёртку над `with_n`:
+```rust
+#[macro_export]
+macro_rules! vect {
+    ($data:expr) => {
+        ::qd_nat::with_n! {
+            let v = $data;
+            $crate::collect::<_, N, _>(v)
+        }
+    };
+}
+```
+Работает эта конструкция предельно грубо и прямолинейно: запрашиваем свежий тип `N`, передаём его через "турборыбу" функции `collect`, в качестве аргумента ей скармливаем входные данные. На выходе получаем искомый `Vect<N, T>`.
+ 
