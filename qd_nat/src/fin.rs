@@ -41,13 +41,14 @@ impl<N: Nat> Iterator for IterUntil<N> {
 
     #[inline]
     fn nth(&mut self, n: usize) -> Option<Fin<N>> {
+        let max_value = N::get_usize().unwrap();
         if let Some(plus_n) = self.0.checked_add(n) {
-            if plus_n < N::get_usize().unwrap() {
+            if plus_n < max_value {
                 self.0 = plus_n + 1;
                 return Some(Fin(plus_n, PhantomData));
             }
         }
-        self.0 = N::get_usize().unwrap();
+        self.0 = max_value;
         None
     }
 }
