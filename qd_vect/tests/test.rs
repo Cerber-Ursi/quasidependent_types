@@ -70,10 +70,23 @@ fn runtime_size() {
 }
 
 #[test]
+#[should_panic(expected = "Attempted to override already stored value 0 with 1")]
+fn runtime_size_mismatch() {
+    use qd_vect::collect;
+    with_n! {
+        let (_, mut v) = collect::<_, N, _>(vec![]);
+        assert_eq!(v.as_native().len(), 0);
+        v = collect(vec![1]).1;
+        // this statement is in fact unreachable, since the previous one should panic
+        assert_eq!(v.as_native().len(), 1);
+    }
+}
+
+#[test]
 fn fixed_size() {
     use qd_vect::collect;
     use typenum::consts::*;
-    let (_, v) = collect::<_, _, U2, _>(vec![1u32, 2]);
+    let (_, v) = collect::<_, U2, _>(vec![1u32, 2]);
     assert_eq!(v.into_native(), vec![1u32, 2]);
 }
 
@@ -82,7 +95,7 @@ fn fixed_size() {
 fn fixed_size_mismatch() {
     use qd_vect::collect;
     use typenum::consts::*;
-    let _ = collect::<_, _, U2, _>(&[1]);
+    let _ = collect::<_, U2, _>(&[1]);
 }
 
 #[test]

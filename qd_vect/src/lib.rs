@@ -22,7 +22,7 @@ impl<Item, N: Nat> Dependent for Vect<Item, N> {
     }
 }
 
-pub fn collect<Item, N: Nat, N2: Nat + From<N>, I: IntoIterator<Item = Item>>(
+pub fn collect<Item, N: Nat, I: IntoIterator<Item = Item>>(
     iter: I,
 ) -> (N, Vect<Item, N>) {
     let inner: Vec<_> = iter.into_iter().collect();
@@ -34,7 +34,7 @@ macro_rules! vect {
     ($data:expr) => {
         ::qd_nat::with_n! {
             let v = $data;
-            $crate::collect::<_, _, N, _>(v)
+            $crate::collect::<_, N, _>(v)
         }
     };
 }
