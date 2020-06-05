@@ -9,7 +9,7 @@ impl<N1: Nat, N2: Nat> Equiv<N1, N2> {
     pub fn rev(self) -> Equiv<N2, N1> {
         Equiv::deduce(self)
     }
-    pub fn try_create() -> Option<Self> {
+    pub fn check() -> Option<Self> {
         N1::get_usize().and_then(|n1| {
             N2::get_usize().and_then(|n2| {
                 if n1 == n2 {
@@ -20,8 +20,8 @@ impl<N1: Nat, N2: Nat> Equiv<N1, N2> {
             })
         })
     }
-    pub fn check(_: N1, _: N2) -> Option<Self> {
-        Self::try_create()
+    pub fn try_prove_for(_: N1, _: N2) -> Option<Self> {
+        Self::check()
     }
 }
 

@@ -12,11 +12,11 @@ fn test_pair() {
     let n1 = with_n!(N::from_usize(1).unwrap());
     let n2 = with_n!(N::from_usize(2).unwrap());
 
-    match Equiv::check(n, n1) {
+    match Equiv::try_prove_for(n, n1) {
         Some(proof) => accepts_pair(n, n1, proof),
         None => panic!("1 != 1, WTF?"),
     };
-    match Equiv::check(n1, n2) {
+    match Equiv::try_prove_for(n1, n2) {
         None => {}
         Some(_) => panic!("1 == 2, WTF?"),
     }
