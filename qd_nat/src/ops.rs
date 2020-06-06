@@ -31,6 +31,11 @@ impl<N1: Nat, N2: Nat> Nat for Add<N1, N2> {
         Self::get_usize().map(|_| Self(PhantomData))
     }
 }
+impl<N1: Nat, N2: Nat> Add<N1, N2> {
+    pub fn sum(_: N1, _: N2) -> Self {
+        Self::get()
+    }
+}
 
 // here can be more implementations (Sub, Mul etc.), but let us stop here for now
 
