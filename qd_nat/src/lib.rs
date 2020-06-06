@@ -1,6 +1,5 @@
 mod eq;
 mod holder;
-mod primitive;
 
 #[cfg(feature = "nat_ops")]
 mod ops;
@@ -16,7 +15,6 @@ pub fn expect_nat<N: Nat>(s: usize) -> N {
 
 pub use self::eq::*;
 pub use self::holder::*;
-pub use self::primitive::Primitive;
 pub use self::timestamped::nat::*;
 
 #[cfg(feature = "nat_ops")]

@@ -38,7 +38,6 @@ pub mod nat {
                     Self::get_usize().map(|_| Self)
                 }
             }
-            impl $crate::Primitive for N {}
             $($inner)*
         }};
     }
@@ -46,7 +45,7 @@ pub mod nat {
     #[cfg(feature = "typenum_consts")]
     mod typenum_consts {
         use super::*;
-        use crate::{primitive::Primitive, NatStoreError};
+        use crate::NatStoreError;
         use typenum::Unsigned;
 
         unsafe impl<T: Unsigned> NatInner for T {}
@@ -71,7 +70,6 @@ pub mod nat {
                 Some(Self::default())
             }
         }
-        impl<T: Unsigned + Nat> Primitive for T {}
     }
     #[cfg(feature = "typenum_consts")]
     pub use self::typenum_consts::*;
