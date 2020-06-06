@@ -22,6 +22,8 @@ pub enum NatStoreError {
     Concurrent,
     #[error("Attempted to override already stored value {0} with {1}")]
     AlreadyStored(usize, usize),
+    #[error("Attempted to create composite number {0} before its components")]
+    UnknownCompositeParts(&'static str),
 }
 
 pub struct NatHolder {

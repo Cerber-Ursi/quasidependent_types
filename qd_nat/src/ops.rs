@@ -12,12 +12,14 @@ impl<N1: Nat, N2: Nat> Nat for Add<N1, N2> {
         Self::get_usize().expect("`Add` was created and queried before its components were set")
     }
     fn from_usize(s: usize) -> Result<Self, NatStoreError> {
-        if Self::get_usize() == Some(s) {
-            Ok(Self(PhantomData))
+        if let Some(inner) = Self::get_usize() {
+            if inner == s {
+                Ok(Self(PhantomData))
+            } else {
+                Err(NatStoreError::AlreadyStored(inner, s))
+            }
         } else {
-            unimplemented!(
-                "I'm not sure how to handle this error, but this should not be called anyway"
-            );
+            Err(NatStoreError::UnknownCompositeParts(std::any::type_name::<Self>()))
         }
     }
     fn get() -> Self {

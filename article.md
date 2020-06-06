@@ -724,7 +724,7 @@ fn overflow() {
 ```
 При первой попытке запустить этот тест "как есть" я честно подождал пару минут и убедился, что процесс завершаться не собирается. Причина, разумеется, в реализации `skip`, а вернее, в дефолтной реализации `nth`, которую использует `skip`: она просто многократно вызывает `next`, что при таком количестве элементов - процесс явно небыстрый.
 
-К счастью, у нас уже есть стандартный аналог, а именно, `Range`. Сдублировав его логику, мы получили следующее дополнение:
+К счастью, у нас уже есть стандартный аналог нашего итератора, а именно, `Range`. Сдублировав его логику, мы получили следующее дополнение:
 ```rust
 impl<N: Nat> Iterator for IterUntil<N> {
     // пропуск
@@ -757,4 +757,142 @@ pub trait NatIterUntil: Nat {
     }
 }
 impl<N: Nat> NatIterUntil for N {}
+```
+
+И, вооружившись этим инструментом, снова возвращаемся к векторам.
+
+### `qd_vect`: гарантированно корректный индекс
+
+Как уже было сказано выше, `Fin<N>` нам может пригодиться как гарантированно корректный индекс в `Vect<N, T>`. К примеру, мы можем реализовать следующий метод:
+
+```rust
+impl<Item, N: Nat> Vect<Item, N> {
+    pub fn find_index(&self, mut predicate: impl FnMut(&Item) -> bool) -> Option<Fin<N>> {
+        N::iter_until().find(|&n| predicate(&self[n]))
+    }
+}
+```
+Прелесть ситуации заключается в том, что теперь мы можем написать небольшой unsafe-код, который будет корректен благодаря гарантиям, даваемым типом `Fin` и самим типом вектора:
+```rust
+impl<Item, N: Nat> Index<Fin<N>> for Vect<Item, N> {
+    type Output = Item;
+    fn index(&self, index: Fin<N>) -> &Item {
+        // Безопасность: Fin<N>::as_usize(fin) < N::get_usize() == self.0.len() 
+        unsafe { self.0.get_unchecked(index.as_usize()) }
+    }
+}
+```
+Это, пожалуй, не слишком интересно на практике - цена проверки на попадание в границы вектора в тех случаях, где можно применить `Fin`, обычно невелика, но сам факт, что можно на уровне типов гарантировать получение элемента вектора, занятен.
+
+### `qd_nat`: фиксированные числа
+
+В прошлой статье мы для финальной стадии наших разработок использовали чёрную магию типов на основе [`typenum`](https://crates.io/crates/typenum). Почему бы не вспомнить о нём и здесь? В конце концов, типаж `Unsigned` из `typenum` формально тоже является квазизависимым натуральным числом - с той маленькой поправкой, что значение каждого такого числа известно на этапе компиляции.
+
+И, действительно, мы можем реализовать наш типаж `Nat` для чисел из `typenum`:
+```rust
+use typenum::Unsigned;
+
+unsafe impl<T: Unsigned> NatInner for T {}
+impl<T: Unsigned + Default + Copy + Clone> Nat for T {
+    fn get_usize() -> Option<usize> {
+        Some(Self::USIZE)
+    }
+    fn as_usize(self) -> usize {
+        Self::USIZE
+    }
+    fn from_usize(s: usize) -> Result<Self, NatStoreError> {
+        if s == Self::USIZE {
+            Ok(Self::default())
+        } else {
+            Err(NatStoreError::AlreadyStored(Self::USIZE, s))
+        }
+    }
+    fn get() -> Self {
+        Self::default()
+    }
+    fn try_get() -> Option<Self> {
+        Some(Self::default())
+    }
+}
+```
+Единственное условно-тонкое место здесь - как получить объект обобщённого типа. Тут мы воспользовались тем простым фактом, что [типаж `Unsigned` требует наличия типажа `Default`](https://docs.rs/typenum/1.12.0/typenum/marker_traits/trait.Unsigned.html).
+
+### `qd_vect`: generic array на новый лад
+
+Используя реализацию выше, мы можем создавать векторы, длина которых известна во время компиляции. Пока что не совсем понятно, зачем это может пригодиться, когда у нас есть [`generic_array`](https://crates.io/crates/generic-array), но тем не менее:
+```rust
+#[test]
+fn fixed_size() {
+    use qd_vect::collect;
+    use typenum::consts::*;
+    let (_, v) = collect::<_, U2, _>(vec![1u32, 2]);
+    assert_eq!(v.into_native(), vec![1u32, 2]);
+}
+
+#[test]
+#[should_panic(expected = "Attempted to override already stored value 2 with 1")]
+fn fixed_size_mismatch() {
+    use qd_vect::collect;
+    use typenum::consts::*;
+    let _ = collect::<_, U2, _>(&[1]);
+}
+``` 
+
+### `qa_nat`: операции над числами
+
+Вернёмся снова к нашим квазизависимым числам. До сих пор всё, что мы умели с ними делать, - создавать и проверять на равенство (с помощью типа `Equiv`). Это, безусловно, интересно, но мы можем сделать больше - а именно, мы можем организовать арифметику для таких чисел.
+
+В текущем проекте мы ограничимся только сложением - во-первых, это наиболее простая операция, во-вторых, в нынешнем контексте (работы с векторами) она имеет вполне ясный смысл (конкатенация). Заведём отдельный тип для суммы двух натуральных чисел:
+```rust
+#[derive(Copy, Clone)]
+pub struct Add<N1: Nat, N2: Nat>(PhantomData<(N1, N2)>);
+```
+Само собой, он тоже будет являться квазизависимым натуральным числом:
+```rust
+impl<N1: Nat, N2: Nat> Nat for Add<N1, N2> {
+    fn get_usize() -> Option<usize> {
+        N1::get_usize().and_then(|n1| N2::get_usize().map(|n2| n1 + n2))
+    }
+    fn as_usize(self) -> usize {
+        Self::get_usize().expect("`Add` was created and queried before its components were set")
+    }
+    fn from_usize(s: usize) -> Result<Self, NatStoreError> {
+        if let Some(inner) = Self::get_usize() {
+            if inner == s {
+                Ok(Self(PhantomData))
+            } else {
+                Err(NatStoreError::AlreadyStored(inner, s))
+            }
+        } else {
+            todo!("Needs fix to NatStoreError")
+        }
+    }
+    fn get() -> Self {
+        Self::try_get().expect("Trying to create `Add` instance which is yet undefined")
+    }
+    fn try_get() -> Option<Self> {
+        Self::get_usize().map(|_| Self(PhantomData))
+    }
+}
+```
+Единственное место, с которым есть вопросы, - `todo` в `from_usize`. Дело в том, что на начальном этапе мы не предусмотрели такой возможности - мы рассматривали только "простые" натуральные числа, непосредственно соответствующие тому или иному обычному числу, а не собираемые из нескольких компонентов.
+
+Добавим третий вариант в NatStoreError:
+```rust
+#[derive(Debug, Error)]
+pub enum NatStoreError {
+    // пропуск
+    #[error("Attempted to create composite number {0} before its components")]
+    UnknownCompositeParts(&'static str),
+}
+```
+И соответствующим образом исправим `from_usize`:
+```rust
+fn from_usize(s: usize) -> Result<Self, NatStoreError> {
+    if let Some(inner) = Self::get_usize() {
+        // пропуск
+    } else {
+        Err(NatStoreError::UnknownCompositeParts(std::any::type_name::<Self>()))
+    }
+}
 ```
