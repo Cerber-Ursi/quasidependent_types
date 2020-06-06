@@ -16,6 +16,14 @@ fn zip_sum<T: Clone + Add<T, Output = T>, N: Nat>(
     v1
 }
 
+fn equiv<T: Clone + PartialEq<T>, N: Nat>(first: Vect<T, N>, second: Vect<T, N>) -> bool {
+    first
+        .freeze()
+        .iter()
+        .zip(second.freeze())
+        .all(|(i1, i2)| i1 == i2)
+}
+
 #[test]
 fn summing() {
     let (_, v1) = vect!(vec![1]);
@@ -156,8 +164,8 @@ fn concats() {
     assert_eq!(sum.into_native(), vec![3, 5, 4]);
 
     let (n3, v3) = vect!(vec![4, 5]);
-    let v12 = v1.clone().concat(v2);
-    let v13 = v1.concat(v3);
+    let v12 = v1.clone().concat(v2.clone());
+    let v13 = v1.clone().concat(v3.clone());
 
     match Equiv::try_prove_for(n2, n3) {
         Some(proof) => {
@@ -166,4 +174,8 @@ fn concats() {
         }
         None => panic!("2 != 2, WTF?"),
     }
+
+    let v_12_3 = v1.clone().concat(v2.clone()).concat(v3.clone());
+    let v_1_23 = v1.concat(v2.concat(v3));
+    assert!(equiv(v_1_23.retag(Equiv::proof()), v_12_3));
 }
