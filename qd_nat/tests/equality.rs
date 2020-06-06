@@ -1,4 +1,4 @@
-use qd_nat::{Equiv, Nat, Add};
+use qd_nat::{Equiv, Nat};
 
 fn accepts_pair<N1: Nat, N2: Nat>(n1: N1, n2: N2, _proof: Equiv<N1, N2>) {
     assert_eq!(n1.as_usize(), n2.as_usize()); // never fails
@@ -24,8 +24,8 @@ fn checked() {
 
 #[test]
 fn proved() {
-    use qd_nat::with_n;
-    use qd_core::StaticallyProvable;
+    use qd_core::{Deducible, StaticallyProvable};
+    use qd_nat::{with_n, Add, Associative};
 
     let n1 = with_n!(N::from_usize(1).unwrap());
     accepts_pair(n1, n1, Equiv::proof());
@@ -36,7 +36,23 @@ fn proved() {
     accepts_pair(Add::sum(n1, n2), Add::sum(n2, n1), Equiv::proof());
 
     let n3 = with_n!(N::from_usize(3).unwrap());
-    accepts_pair(Add::sum(n1, Add::sum(n2, n3)), Add::sum(Add::sum(n1, n2), n3), Equiv::proof());
+    accepts_pair(
+        Add::sum(n1, Add::sum(n2, n3)),
+        Add::sum(Add::sum(n1, n2), n3),
+        Equiv::proof(),
+    );
+
+    accepts_pair(
+        Add::sum(Add::sum(n1, n2), n3),
+        Add::sum(n1, Add::sum(n2, n3)),
+        Equiv::deduce(Equiv::proof()),
+    );
+
+    accepts_pair(
+        Add::sum(n1, Add::sum(n2, n3)),
+        Add::sum(n3, Add::sum(n1, n2)),
+        Equiv::deduce((Equiv::prove_by_rule(Associative), Equiv::proof())),
+    );
 }
 
 #[test]

@@ -10,9 +10,12 @@ pub trait Dependent {
     fn as_native(&self) -> &Self::Native;
 }
 
-pub trait StaticallyProvable<Rule> where Self: Sized {
+pub trait StaticallyProvable<Rule>
+where
+    Self: Sized,
+{
     fn proof() -> Self;
-    fn by_rule(_: Rule) -> Self {
+    fn prove_by_rule(_: Rule) -> Self {
         Self::proof()
     }
 }

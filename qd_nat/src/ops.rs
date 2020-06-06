@@ -39,8 +39,8 @@ impl<N1: Nat, N2: Nat> Add<N1, N2> {
 
 // here can be more implementations (Sub, Mul etc.), but let us stop here for now
 
-pub struct Symmetric;
-impl<N1: Nat, N2: Nat> StaticallyProvable<Symmetric> for Equiv<Add<N1, N2>, Add<N2, N1>> {
+pub struct AddSymmetric;
+impl<N1: Nat, N2: Nat> StaticallyProvable<AddSymmetric> for Equiv<Add<N1, N2>, Add<N2, N1>> {
     fn proof() -> Self {
         Self(PhantomData)
     }
