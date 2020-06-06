@@ -30,7 +30,6 @@ impl<N: Nat> Iterator for IterUntil<N> {
         }
     }
 
-
     #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         match self.0.checked_sub(N::get_usize().unwrap()) {

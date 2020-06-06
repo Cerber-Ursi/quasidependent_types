@@ -19,7 +19,9 @@ impl<N1: Nat, N2: Nat> Nat for Add<N1, N2> {
                 Err(NatStoreError::AlreadyStored(inner, s))
             }
         } else {
-            Err(NatStoreError::UnknownCompositeParts(std::any::type_name::<Self>()))
+            Err(NatStoreError::UnknownCompositeParts(std::any::type_name::<
+                Self,
+            >()))
         }
     }
     fn get() -> Self {
@@ -38,6 +40,14 @@ impl<N1: Nat, N2: Nat> StaticallyProvable for Equiv<Add<N1, N2>, Add<N2, N1>> {
     }
 }
 
+impl<N1: Nat, N2: Nat, N3: Nat> StaticallyProvable
+    for Equiv<Add<N1, Add<N2, N3>>, Add<Add<N1, N2>, N3>>
+{
+    fn proof() -> Self {
+        Self(PhantomData)
+    }
+}
+
 impl<M: Nat, N1: Nat, N2: Nat> Deducible<Equiv<N1, N2>> for Equiv<Add<M, N1>, Add<M, N2>> {
     fn deduce(_: Equiv<N1, N2>) -> Self {
         Self(PhantomData)
@@ -46,15 +56,18 @@ impl<M: Nat, N1: Nat, N2: Nat> Deducible<Equiv<N1, N2>> for Equiv<Add<M, N1>, Ad
 
 #[cfg(feature = "typenum_consts")]
 mod impl_typenum {
-    use typenum::Unsigned;
     use crate::{Add as NatAdd, Equiv, Nat};
     use qd_core::StaticallyProvable;
     use std::marker::PhantomData;
     use std::ops::Add;
+    use typenum::Unsigned;
 
     #[cfg(feature = "typenum_consts")]
-    impl<N1: Unsigned + Nat, N2: Unsigned + Nat, N3: Unsigned + Nat> StaticallyProvable for Equiv<NatAdd<N1, N2>, N3>
-        where N1: Add<N2, Output = N3> {
+    impl<N1: Unsigned + Nat, N2: Unsigned + Nat, N3: Unsigned + Nat> StaticallyProvable
+        for Equiv<NatAdd<N1, N2>, N3>
+    where
+        N1: Add<N2, Output = N3>,
+    {
         fn proof() -> Self {
             Self(PhantomData)
         }

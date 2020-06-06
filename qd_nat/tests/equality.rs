@@ -24,9 +24,9 @@ fn test_pair() {
 
 #[test]
 fn test_typenum() {
-    use typenum::{U1, U2, U3};
     use qd_core::StaticallyProvable;
     use qd_nat::Add;
+    use typenum::{U1, U2, U3};
 
     accepts_pair(Add::<U1, U2>::get(), U3::default(), Equiv::proof());
 }

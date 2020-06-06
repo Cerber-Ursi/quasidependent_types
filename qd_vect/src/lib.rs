@@ -22,9 +22,7 @@ impl<Item, N: Nat> Dependent for Vect<Item, N> {
     }
 }
 
-pub fn collect<Item, N: Nat, I: IntoIterator<Item = Item>>(
-    iter: I,
-) -> (N, Vect<Item, N>) {
+pub fn collect<Item, N: Nat, I: IntoIterator<Item = Item>>(iter: I) -> (N, Vect<Item, N>) {
     let inner: Vec<_> = iter.into_iter().collect();
     (expect_nat(inner.len()), Vect(inner, PhantomData))
 }
