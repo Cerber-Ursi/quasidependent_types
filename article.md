@@ -907,3 +907,24 @@ fn add_unknown() {
 }
 ```
 Стабильного сообщения об ошибке мы, к сожалению, не получим, поскольку метод `std::any::type_name` не даёт никаких гарантий относительно результатов работы, кроме того, что это будет человекочитаемое представление типа; поэтому на этом тесте мы ставим просто `should_panic`, без указания конкретного сообщения об ошибке.
+
+### `qd_vect`: конкатенация
+
+Ну что ж, теперь мы можем рассмотреть строго типизированную конкатенацию квазизависимых векторов. Добавим ещё один метод к `Vect`:
+```rust
+impl<Item, N: Nat> Vect<Item, N> {
+    fn concat<N2: Nat>(mut self, vect: Vect<Item, N2>) -> Vect<Item, Add<N, N2>> {
+        self.0.extend(vect.into_native());
+        Vect(self.0, PhantomData)
+    }
+}
+```
+Ну и, что называется, чтоб два раза не вставать - заодно и ещё один:
+```rust
+impl<Item, N: Nat> Vect<Item, N> {
+    pub fn push(mut self, item: Item) -> Vect<Item, Add<N, typenum::consts::U1>> {
+        self.0.extend(std::iter::once(item));
+        Vect(self.0, PhantomData)
+    }
+}
+```

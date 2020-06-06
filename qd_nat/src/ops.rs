@@ -43,3 +43,20 @@ impl<M: Nat, N1: Nat, N2: Nat> Deducible<Equiv<N1, N2>> for Equiv<Add<M, N1>, Ad
         Self(PhantomData)
     }
 }
+
+#[cfg(feature = "typenum_consts")]
+mod impl_typenum {
+    use typenum::Unsigned;
+    use crate::{Add as NatAdd, Equiv, Nat};
+    use qd_core::StaticallyProvable;
+    use std::marker::PhantomData;
+    use std::ops::Add;
+
+    #[cfg(feature = "typenum_consts")]
+    impl<N1: Unsigned + Nat, N2: Unsigned + Nat, N3: Unsigned + Nat> StaticallyProvable for Equiv<NatAdd<N1, N2>, N3>
+        where N1: Add<N2, Output = N3> {
+        fn proof() -> Self {
+            Self(PhantomData)
+        }
+    }
+}

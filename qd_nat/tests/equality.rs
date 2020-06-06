@@ -21,3 +21,12 @@ fn test_pair() {
         Some(_) => panic!("1 == 2, WTF?"),
     }
 }
+
+#[test]
+fn test_typenum() {
+    use typenum::{U1, U2, U3};
+    use qd_core::StaticallyProvable;
+    use qd_nat::Add;
+
+    accepts_pair(Add::<U1, U2>::get(), U3::default(), Equiv::proof());
+}
