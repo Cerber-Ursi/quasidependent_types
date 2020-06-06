@@ -34,13 +34,15 @@ impl<N1: Nat, N2: Nat> Nat for Add<N1, N2> {
 
 // here can be more implementations (Sub, Mul etc.), but let us stop here for now
 
-impl<N1: Nat, N2: Nat> StaticallyProvable for Equiv<Add<N1, N2>, Add<N2, N1>> {
+pub struct Symmetric;
+impl<N1: Nat, N2: Nat> StaticallyProvable<Symmetric> for Equiv<Add<N1, N2>, Add<N2, N1>> {
     fn proof() -> Self {
         Self(PhantomData)
     }
 }
 
-impl<N1: Nat, N2: Nat, N3: Nat> StaticallyProvable
+pub struct Associative;
+impl<N1: Nat, N2: Nat, N3: Nat> StaticallyProvable<Associative>
     for Equiv<Add<N1, Add<N2, N3>>, Add<Add<N1, N2>, N3>>
 {
     fn proof() -> Self {
@@ -62,8 +64,8 @@ mod impl_typenum {
     use std::ops::Add;
     use typenum::Unsigned;
 
-    #[cfg(feature = "typenum_consts")]
-    impl<N1: Unsigned + Nat, N2: Unsigned + Nat, N3: Unsigned + Nat> StaticallyProvable
+    pub struct Const;
+    impl<N1: Unsigned + Nat, N2: Unsigned + Nat, N3: Unsigned + Nat> StaticallyProvable<Const>
         for Equiv<NatAdd<N1, N2>, N3>
     where
         N1: Add<N2, Output = N3>,

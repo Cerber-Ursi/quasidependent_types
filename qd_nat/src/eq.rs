@@ -1,4 +1,4 @@
-use super::{Nat, Primitive};
+use super::Nat;
 use qd_core::{Deducible, StaticallyProvable};
 use std::marker::PhantomData;
 
@@ -37,7 +37,8 @@ pub trait NatWrapper: Nat {
 }
 impl<N: Nat> NatWrapper for N {}
 
-impl<N: Primitive> StaticallyProvable for Equiv<N, N> {
+pub struct Refl;
+impl<N: Nat> StaticallyProvable<Refl> for Equiv<N, N> {
     fn proof() -> Self {
         Self::refl()
     }

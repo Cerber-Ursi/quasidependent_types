@@ -10,7 +10,7 @@ error[E0283]: type annotations needed for `(N, qd_vect::Vect<T, N>)`
    | 
   ::: $WORKSPACE/qd_vect/src/lib.rs:25:25
    |
-25 | pub fn collect<Item, N: Nat, I: IntoIterator<Item = Item>>(
+25 | pub fn collect<Item, N: Nat, I: IntoIterator<Item = Item>>(iter: I) -> (N, Vect<Item, N>) {
    |                         --- required by this bound in `qd_vect::collect`
    |
    = note: cannot resolve `_: qd_nat::timestamped::nat::Nat`
